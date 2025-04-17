@@ -15,11 +15,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
-
-
+from django.urls import path
+from minhaapp.views import listar_produtos  # ✅ Correto
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('minhaapp.urls')),
+    path('api/produtos/', listar_produtos),  # agora o React pode acessar
 ]
+
+
