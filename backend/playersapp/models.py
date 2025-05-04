@@ -1,4 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+
+
 
 class Funcionario(models.Model):
     nome = models.CharField(max_length=100)
@@ -9,6 +12,6 @@ class Funcionario(models.Model):
     ex_product_owner = models.BooleanField(default=False)
     ex_scrum_master = models.BooleanField(default=False)
 
-
     def __str__(self):
         return self.nome
+    
