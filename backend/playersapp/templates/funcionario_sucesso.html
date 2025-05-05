@@ -2,10 +2,56 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Sucesso!</title>
+    <title>{% block title %}Funcionário Cadastrado{% endblock %}</title>
+    {% block extra_css %}
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .success-container h1 {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .success-container a {
+            margin-top: 15px;
+            display: inline-block;
+            padding: 10px 20px;
+            color: white;
+            background-color: #007bff;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .success-container a:hover {
+            background-color: #0056b3;
+        }
+
+        .success-container .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        .success-container .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+    {% endblock %}
 </head>
 <body>
-    <h1>Funcionário cadastrado com sucesso!</h1>
-    <a href="/cadastrar/">Cadastrar novo funcionário</a>
+    {% block content %}
+    <div class="success-container">
+        <h1>Funcionário cadastrado com sucesso!</h1>
+        <a href="{% url 'cadastrar_funcionario' %}" class="btn btn-primary">Cadastrar outro funcionário</a>
+        <a href="{% url 'listar_funcionarios' %}" class="btn btn-secondary">Ver lista de funcionários</a>
+    </div>
+    {% endblock %}
 </body>
 </html>

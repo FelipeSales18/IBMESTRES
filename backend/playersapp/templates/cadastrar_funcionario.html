@@ -3,15 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Cadastrar Funcionário</title>
+    {% load static %}
+    {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'playersapp/cadastrar_funcionario.css' %}">
+    {% endblock %}
 </head>
 <body>
-    <h1>Cadastro de Funcionário</h1>
-
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Cadastrar</button>
-    </form>
-
+    {% block content %}
+    <a href="{% url 'home' %}" class="btn btn-secondary mt-3" id="botao voltar">Voltar</a> <!-- Botão de voltar -->
+    <div class="container">
+        <h1>Cadastrar Funcionário</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+        </form>
+        
+    </div>
+  
+    {% endblock %}
 </body>
 </html>

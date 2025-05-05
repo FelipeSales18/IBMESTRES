@@ -1,31 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Funcionários</title>
-</head>
-<body>
-    <h1>Lista de Funcionários</h1>
-    <table border="1">
-        <thead>
+{% extends 'base.html' %}
+
+{% block title %}Listar Funcionários{% endblock %}
+
+{% block content %}
+<h1>Lista de Funcionários</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Idade</th>
+            <th>Hard Skills</th>
+            <th>Soft Skills</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for funcionario in funcionarios %}
             <tr>
-                <th>Nome</th>
-                <th>Idade</th>
-                <th>Hard Skills</th>
-                <th>Soft Skills</th>
+                <td>{{ funcionario.nome }}</td>
+                <td>{{ funcionario.idade }}</td>
+                <td>{{ funcionario.hard_skils }}</td>
+                <td>{{ funcionario.soft_skils }}</td>
             </tr>
-        </thead>
-        <tbody>
-            {% for funcionario in funcionarios %}
-                <tr>
-                    <td>{{ funcionario.nome }}</td>
-                    <td>{{ funcionario.idade }}</td>
-                    <td>{{ funcionario.hard_skils }}</td>
-                    <td>{{ funcionario.soft_skils }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
