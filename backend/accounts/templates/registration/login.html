@@ -5,20 +5,18 @@
 {% block content %}
 
 <div class="col-md-4">
-    <form method="post">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success" style="font-size: 1.2em; color: white; background-color: green; padding: 10px; border-radius: 5px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
-
-        <div class="mb-3">
-            <label class="form-label" for="id_username">Usuário:</label>
-            <input type="text" name="username" class="form-control">
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label" for="id_password">Senha:</label>
-            <input type="password" name="password" class="form-control">
-        </div>
-
-        <button class="btn btn-warning" type="submit">Entrar</button>
+        {{ form.as_p }}
+        <button type="submit">Entrar</button>
     </form>
     
     <a href="{% url 'password_reset' %}">Esqueci minha senha</a>
