@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Funcionario
+from .models import Funcionario, Equipe
 
 class FuncionarioForm(forms.ModelForm):
     class Meta:
@@ -14,3 +14,15 @@ class FuncionarioForm(forms.ModelForm):
             'ex_product_owner',
             'ex_scrum_master',
         ]
+
+class AssociarEquipeForm(forms.Form):
+    funcionario = forms.ModelChoiceField(
+        queryset=Funcionario.objects.all(),
+        label="Colaborador",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    equipe = forms.ModelChoiceField(
+        queryset=Equipe.objects.all(),  # Certifique-se de que as equipes estão sendo carregadas
+        label="Equipe",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )

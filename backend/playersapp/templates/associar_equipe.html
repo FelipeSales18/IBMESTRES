@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Associar Equipe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'playersapp/styles.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>Associar Equipe a Colaborador</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Associar</button>
+</form>
+<a href="{% url 'listar_equipes' %}" class="btn btn-secondary mt-3">Voltar</a>
+{% endblock %}

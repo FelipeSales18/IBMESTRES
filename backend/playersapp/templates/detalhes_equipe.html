@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes da Equipe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'playersapp/styles.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>Detalhes da Equipe</h1>
+<h2>{{ equipe.nome }}</h2>
+<p><strong>Descrição:</strong> {{ equipe.descricao }}</p>
+<p><strong>Líder:</strong> {{ equipe.lider.nome if equipe.lider else "Sem líder" }}</p>
+<a href="{% url 'listar_equipes' %}" class="btn btn-secondary">Voltar</a>
+{% endblock %}

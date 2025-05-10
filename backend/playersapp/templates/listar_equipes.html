@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Listar Equipes{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'playersapp/styles.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>Lista de Equipes</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Líder</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for equipe in equipes %}
+            <tr>
+                <td>{{ equipe.nome }}</td>
+                <td>{{ equipe.descricao }}</td>
+                <td>
+                    {% if equipe.lider %}
+                        {{ equipe.lider.nome }}
+                    {% else %}
+                        Sem líder
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'detalhes_equipe' equipe.id %}" class="btn btn-info">Detalhes</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'associar_equipe' %}" class="btn btn-primary">Associar Equipe</a>
+{% endblock %}
