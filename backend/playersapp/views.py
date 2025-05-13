@@ -1,7 +1,8 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from .forms import FuncionarioForm, AssociarEquipeForm
-from .models import Funcionario, Equipe
+from .forms import FuncionarioForm, AssociarEquipeForm, ProjetoForm
+from .models import Funcionario, Equipe, Projeto
 
 def home(request):
     return render(request, 'base.html')
@@ -51,5 +52,33 @@ def detalhes_equipe(request, equipe_id):
     
     # Renderiza a página com os detalhes da equipe
     return render(request, 'detalhes_equipe.html', {'equipe': equipe})
+
+@login_required
+def listar_projetos(request):
+    # Verifica se o usuário é um líder
+    funcionario = Funcionario.objects.filter(user=request.user).first()
+    if not funcionario or not request.user.is_staff:
+        return redirect('home')  # Redireciona para a página inicial se não for líder
+
+    projetos = Projeto.objects.filter(lider=funcionario)
+    return render(request, 'listar_projetos.html', {'projetos': projetos})
+
+@login_required
+def criar_projeto(request):
+    funcionario = Funcionario.objects.filter(user=request.user).first()
+    if not funcionario or not request.user.is_staff:
+        return redirect('home')  # Redireciona para a página inicial se não for líder
+
+    if request.method == 'POST':
+        form = ProjetoForm(request.POST)
+        if form.is_valid():
+            projeto = form.save(commit=False)
+            projeto.lider = funcionario
+            projeto.save()
+            return redirect('listar_projetos')
+    else:
+        form = ProjetoForm()
+
+    return render(request, 'criar_projeto.html', {'form': form})
 
 

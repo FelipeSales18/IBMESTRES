@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Funcionario, Equipe
+from .models import Funcionario, Equipe, Projeto
 
 class FuncionarioForm(forms.ModelForm):
     class Meta:
@@ -26,3 +26,8 @@ class AssociarEquipeForm(forms.Form):
         label="Equipe",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+
+class ProjetoForm(forms.ModelForm):
+    class Meta:
+        model = Projeto
+        fields = ['nome', 'descricao']

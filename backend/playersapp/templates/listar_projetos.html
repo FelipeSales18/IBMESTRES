@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Meus Projetos{% endblock %}
+
+{% block content %}
+<h1>Meus Projetos</h1>
+<a href="{% url 'criar_projeto' %}" class="btn btn-primary mb-3">Criar Novo Projeto</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Data de Criação</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for projeto in projetos %}
+        <tr>
+            <td>{{ projeto.nome }}</td>
+            <td>{{ projeto.descricao }}</td>
+            <td>{{ projeto.data_criacao|date:"d/m/Y H:i" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
