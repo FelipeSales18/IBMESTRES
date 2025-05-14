@@ -55,11 +55,11 @@ def detalhes_equipe(request, equipe_id):
 
 @login_required
 def listar_projetos(request):
-    # Verifica se o usuário é um líder
     funcionario = Funcionario.objects.filter(user=request.user).first()
+    print("Funcionario:", funcionario)
+    print("is_staff:", request.user.is_staff)
     if not funcionario or not request.user.is_staff:
-        return redirect('home')  # Redireciona para a página inicial se não for líder
-
+        return HttpResponse("Você não é líder ou não está vinculado a um funcionário.")
     projetos = Projeto.objects.filter(lider=funcionario)
     return render(request, 'listar_projetos.html', {'projetos': projetos})
 
@@ -80,5 +80,19 @@ def criar_projeto(request):
         form = ProjetoForm()
 
     return render(request, 'criar_projeto.html', {'form': form})
+
+def set_leader_permissions(user, full_name):
+    role = user.groups.values_list('name', flat=True).first()  # Obtém o nome do primeiro grupo do usuário
+
+    if role == 'leader':
+        user.is_staff = True
+        user.save()
+        Funcionario.objects.create(
+            user=user,
+            nome=full_name,
+            idade=0,
+            hard_skils="",
+            soft_skils="",
+        )
 
 
