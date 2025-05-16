@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Associar Equipe{% endblock %}
+{% block title %}{% if object %}Editar{% else %}Nova{% endif %} Equipe{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'playersapp/styles.css' %}">
 {% endblock %}
 
 {% block content %}
-<h1>Associar Equipe a Colaborador</h1>
+<h1>{% if object %}Editar{% else %}Nova{% endif %} Equipe</h1>
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Associar</button>
+    <button type="submit" class="btn btn-success">Salvar</button>
+    <a href="{% url 'listar_equipes' %}" class="btn btn-secondary">Cancelar</a>
 </form>
-<a href="{% url 'listar_equipes' %}" class="btn btn-secondary mt-3">Voltar</a>
 {% endblock %}

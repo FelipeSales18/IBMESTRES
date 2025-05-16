@@ -15,19 +15,27 @@ class Funcionario(models.Model):
         return self.nome
 
 class Equipe(models.Model):
-    nome = models.CharField(max_length=100)
-    descricao = models.TextField(blank=True, null=True)
-    lider = models.ForeignKey(Funcionario, on_delete=models.SET_NULL, null=True, blank=True, related_name='lider_equipe')
-    colaboradores = models.ManyToManyField(Funcionario, related_name='equipes', blank=True)  # Adiciona a relação ManyToMany
+    nome = models.CharField(max_length=100, unique=True)
+    descricao = models.TextField(blank=True)
+    lider = models.ForeignKey('Funcionario', on_delete=models.SET_NULL, null=True, blank=True, related_name='equipes_lideradas')
+    colaboradores = models.ManyToManyField('Funcionario', related_name='equipes')
 
     def __str__(self):
         return self.nome
+
+class Team(models.Model):
+    name = models.CharField(max_length=100, unique=True)  # Nome único da equipe
+    members = models.ManyToManyField(User, related_name='teams')  # Membros da equipe
+
+    def __str__(self):
+        return self.name
 
 class Projeto(models.Model):
     nome = models.CharField(max_length=200)
     descricao = models.TextField(blank=True, null=True)
     lider = models.ForeignKey(Funcionario, on_delete=models.CASCADE, related_name='projetos')
     data_criacao = models.DateTimeField(auto_now_add=True)
+    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='projects')
 
     def __str__(self):
         return self.nome

@@ -9,33 +9,43 @@
 
 {% block content %}
 <h1>Lista de Equipes</h1>
+<a href="{% url 'cadastrar_equipe' %}" class="btn btn-success mb-3">Nova Equipe</a>
 <table class="table table-striped">
     <thead>
         <tr>
             <th>Nome</th>
             <th>Descrição</th>
             <th>Líder</th>
+            <th>Membros</th>
             <th>Ações</th>
         </tr>
     </thead>
     <tbody>
         {% for equipe in equipes %}
-            <tr>
-                <td>{{ equipe.nome }}</td>
-                <td>{{ equipe.descricao }}</td>
-                <td>
-                    {% if equipe.lider %}
-                        {{ equipe.lider.nome }}
-                    {% else %}
-                        Sem líder
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{% url 'detalhes_equipe' equipe.id %}" class="btn btn-info">Detalhes</a>
-                </td>
-            </tr>
+        <tr>
+            <td>{{ equipe.nome }}</td>
+            <td>{{ equipe.descricao }}</td>
+            <td>
+                {% if equipe.lider %}
+                    {{ equipe.lider.nome }}
+                {% else %}
+                    Sem líder
+                {% endif %}
+            </td>
+            <td>
+                {% for membro in equipe.colaboradores.all %}
+                    {{ membro.nome }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                    Sem membros
+                {% endfor %}
+            </td>
+            <td>
+                <a href="{% url 'detalhes_equipe' equipe.id %}" class="btn btn-info btn-sm">Detalhes</a>
+                <a href="{% url 'editar_equipe' equipe.id %}" class="btn btn-primary btn-sm">Editar</a>
+                <a href="{% url 'excluir_equipe' equipe.id %}" class="btn btn-danger btn-sm">Excluir</a>
+            </td>
+        </tr>
         {% endfor %}
     </tbody>
 </table>
-<a href="{% url 'associar_equipe' %}" class="btn btn-primary">Associar Equipe</a>
 {% endblock %}

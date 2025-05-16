@@ -2,7 +2,12 @@ from django.shortcuts import render, redirect
 from .admin import CustomUserCreationForm
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-from playersapp.models import Funcionario
+from playersapp.models import Funcionario, Projeto, Team
+from playersapp.forms import TeamForm
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 # Create your views here.
 @csrf_exempt
@@ -47,4 +52,38 @@ def register(request):
             return redirect('login')
 
     return render(request, "registration/register.html", {"form": form})
+
+class ProjectListView(ListView):
+    model = Projeto
+    template_name = 'projetos/list.html'
+    context_object_name = 'projects'
+
+    def get_queryset(self):
+        return Projeto.objects.select_related('team').all()
+
+# Lista todas as equipes
+class TeamListView(LoginRequiredMixin, ListView):
+    model = Team
+    template_name = 'equipes/team_list.html'
+    context_object_name = 'teams'
+
+# Criação de equipe
+class TeamCreateView(LoginRequiredMixin, CreateView):
+    model = Team
+    form_class = TeamForm
+    template_name = 'equipes/team_form.html'
+    success_url = reverse_lazy('team-list')
+
+# Edição de equipe
+class TeamUpdateView(LoginRequiredMixin, UpdateView):
+    model = Team
+    form_class = TeamForm
+    template_name = 'equipes/team_form.html'
+    success_url = reverse_lazy('team-list')
+
+# Exclusão de equipe
+class TeamDeleteView(LoginRequiredMixin, DeleteView):
+    model = Team
+    template_name = 'equipes/team_confirm_delete.html'
+    success_url = reverse_lazy('team-list')
 

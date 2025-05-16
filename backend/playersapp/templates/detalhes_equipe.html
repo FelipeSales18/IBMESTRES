@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Detalhes da Equipe{% endblock %}
 
@@ -10,6 +11,19 @@
 <h1>Detalhes da Equipe</h1>
 <h2>{{ equipe.nome }}</h2>
 <p><strong>Descrição:</strong> {{ equipe.descricao }}</p>
-<p><strong>Líder:</strong> {{ equipe.lider.nome if equipe.lider else "Sem líder" }}</p>
+<p><strong>Líder:</strong>
+    {% if equipe.lider %}
+        {{ equipe.lider.nome }}
+    {% else %}
+        Sem líder
+    {% endif %}
+</p>
+<p><strong>Membros:</strong>
+    {% for membro in equipe.colaboradores.all %}
+        {{ membro.nome }}{% if not forloop.last %}, {% endif %}
+    {% empty %}
+        Sem membros
+    {% endfor %}
+</p>
 <a href="{% url 'listar_equipes' %}" class="btn btn-secondary">Voltar</a>
 {% endblock %}

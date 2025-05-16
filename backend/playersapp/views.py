@@ -1,8 +1,12 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from .forms import FuncionarioForm, AssociarEquipeForm, ProjetoForm
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from .forms import FuncionarioForm, AssociarEquipeForm, ProjetoForm, EquipeForm
 from .models import Funcionario, Equipe, Projeto
+
 
 def home(request):
     return render(request, 'base.html')
@@ -42,9 +46,32 @@ def listar_associacoes(request):
     funcionarios = Funcionario.objects.all()
     return render(request, 'listar_associacoes.html', {'funcionarios': funcionarios})
 
-def listar_equipes(request):
-    equipes = Equipe.objects.all()
-    return render(request, 'listar_equipes.html', {'equipes': equipes})
+class EquipeListView(LoginRequiredMixin, ListView):
+    model = Equipe
+    template_name = 'listar_equipes.html'
+    context_object_name = 'equipes'
+
+class EquipeCreateView(LoginRequiredMixin, CreateView):
+    model = Equipe
+    form_class = EquipeForm
+    template_name = 'associar_equipe.html'
+    success_url = reverse_lazy('listar_equipes')
+
+class EquipeUpdateView(LoginRequiredMixin, UpdateView):
+    model = Equipe
+    form_class = EquipeForm
+    template_name = 'associar_equipe.html'
+    success_url = reverse_lazy('listar_equipes')
+
+class EquipeDeleteView(LoginRequiredMixin, DeleteView):
+    model = Equipe
+    template_name = 'excluir_equipe.html'
+    success_url = reverse_lazy('listar_equipes')
+
+class EquipeDetailView(LoginRequiredMixin, DetailView):
+    model = Equipe
+    template_name = 'detalhes_equipe.html'
+    context_object_name = 'equipe'
 
 def detalhes_equipe(request, equipe_id):
     # Recupera a equipe pelo ID ou retorna 404 se não existir
