@@ -122,4 +122,26 @@ def set_leader_permissions(user, full_name):
             soft_skils="",
         )
 
+from django.contrib.auth.decorators import login_required
+from .forms import FuncionarioForm
+from .models import Funcionario
+
+@login_required
+def meu_perfil(request):
+    funcionario = Funcionario.objects.filter(user=request.user).first()
+    if request.method == 'POST':
+        # Só atualiza a foto, não sobrescreve outros campos
+        foto = request.FILES.get('foto')
+        if foto:
+            funcionario.foto = foto
+            funcionario.save()
+        return redirect('meu_perfil')
+    return render(request, 'meu_perfil.html', {'funcionario': funcionario})
+
+@login_required
+def minhas_equipes(request):
+    funcionario = Funcionario.objects.filter(user=request.user).first()
+    equipes = funcionario.equipes.all() if funcionario else []
+    return render(request, 'minhas_equipes.html', {'equipes': equipes})
+
 

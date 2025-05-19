@@ -10,6 +10,7 @@ class Funcionario(models.Model):
     ex_developer = models.BooleanField(default=False)
     ex_product_owner = models.BooleanField(default=False)
     ex_scrum_master = models.BooleanField(default=False)
+    foto = models.ImageField(upload_to='fotos_perfil/', null=True, blank=True)  # Novo campo
 
     def __str__(self):
         return self.nome

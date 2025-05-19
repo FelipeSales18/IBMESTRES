@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Meu Perfil{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'playersapp/cadastrar_funcionario.css' %}">
+<style>
+.perfil-container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    padding: 32px;
+    text-align: center;
+}
+.perfil-foto {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #007bff;
+    margin-bottom: 20px;
+    background: #f1f1f1;
+}
+.perfil-label {
+    font-weight: 600;
+    color: #007bff;
+}
+.perfil-info {
+    margin-bottom: 10px;
+    color: #111;
+    text-align: center;
+}
+.form-control-plaintext {
+    display: inline-block;
+    width: auto;
+    color: #111 !important;
+    text-align: center;
+    font-weight: 500;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+input[readonly], textarea[readonly] {
+    background: #f8f9fa;
+    color: #111;
+    text-align: center;
+}
+.perfil-foto-preview {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #007bff;
+    margin-bottom: 20px;
+    background: #f1f1f1;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="perfil-container">
+    <h1>Meu Perfil</h1>
+    <img id="profilePhotoPreview" class="perfil-foto-preview" src="{% if funcionario.foto %}{{ funcionario.foto.url }}{% else %}{% static 'playersapp/default_user.png' %}{% endif %}" alt="Foto de perfil">
+    <form method="post" enctype="multipart/form-data" style="margin-top: 20px;">
+        {% csrf_token %}
+        <label for="profilePhotoInput" class="btn btn-primary" style="display:block; width: fit-content; margin: 0 auto 16px auto;">
+            Alterar foto
+            <input type="file" id="profilePhotoInput" name="foto" accept="image/*" style="display:none;">
+        </label>
+        <hr>
+        <div class="perfil-info"><span class="perfil-label">Nome:</span>
+            <input type="text" value="{{ funcionario.nome }}" readonly class="form-control-plaintext">
+        </div>
+        <div class="perfil-info"><span class="perfil-label">Usuário:</span>
+            <input type="text" value="{{ funcionario.user.username }}" readonly class="form-control-plaintext">
+        </div>
+        {% if not request.user.is_staff %}
+            <div class="perfil-info"><span class="perfil-label">Idade:</span>
+                <input type="text" value="{{ funcionario.idade }}" readonly class="form-control-plaintext">
+            </div>
+            <div class="perfil-info"><span class="perfil-label">Hard Skills:</span>
+                <input type="text" value="{{ funcionario.hard_skils }}" readonly class="form-control-plaintext">
+            </div>
+            <div class="perfil-info"><span class="perfil-label">Soft Skills:</span>
+                <input type="text" value="{{ funcionario.soft_skils }}" readonly class="form-control-plaintext">
+            </div>
+            <div class="perfil-info"><span class="perfil-label">Experiência Scrum:</span>
+                <ul style="list-style: none; padding-left: 0;">
+                    {% if funcionario.ex_developer %}<li>Developer</li>{% endif %}
+                    {% if funcionario.ex_product_owner %}<li>Product Owner</li>{% endif %}
+                    {% if funcionario.ex_scrum_master %}<li>Scrum Master</li>{% endif %}
+                    {% if not funcionario.ex_developer and not funcionario.ex_product_owner and not funcionario.ex_scrum_master %}
+                        <li>Sem experiência Scrum</li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% else %}
+            <div class="perfil-info"><span class="perfil-label">Empresa:</span>
+                <input type="text" value="{{ funcionario.empresa }}" readonly class="form-control-plaintext">
+            </div>
+            <div class="perfil-info"><span class="perfil-label">Anos como Líder:</span>
+                <input type="text" value="{{ funcionario.anos_como_lider }}" readonly class="form-control-plaintext">
+            </div>
+        {% endif %}
+    </form>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('profilePhotoInput');
+    const preview = document.getElementById('profilePhotoPreview');
+    input.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+            preview.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+});
+</script>
+{% endblock %}

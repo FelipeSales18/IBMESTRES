@@ -22,7 +22,26 @@
  
 	<div class="container"> 
 		{% if user.is_authenticated %}
-			<h1>Olá, {{ user.username }}</h1>  
+			<div class="d-flex align-items-center mb-3">
+				<img id="globalProfileImg" src="{% static 'playersapp/default_user.png' %}" alt="Foto do usuário" class="profile-img" style="width:40px; height:40px; border-radius:50%; object-fit:cover; margin-right:12px;">
+				<h1 style="margin:0;">Olá, {{ user.username }}</h1>
+			</div>
+			{% if not user.is_staff %}
+				<div class="mb-3">
+					<h5>Meus Projetos</h5>
+					<ul class="list-group">
+						{% for projeto in user.projects %}
+							<li class="list-group-item">
+								<strong>Projeto:</strong> {{ projeto.nome }}<br>
+								<strong>Equipe:</strong> {{ projeto.equipe.nome }}<br>
+								<strong>Função:</strong> {{ projeto.funcao }}
+							</li>
+						{% empty %}
+							<li class="list-group-item">Nenhum projeto atribuído.</li>
+						{% endfor %}
+					</ul>
+				</div>
+			{% endif %}
 		{% endif %} 
 		{% block content %}{% endblock %} 
 	</div>
@@ -33,6 +52,17 @@
 	<script src="{% static 'js/scripts.js' %}"></script>
 
 	{% block scripts %}{% endblock scripts %} 
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const globalImg = document.getElementById('globalProfileImg');
+		const FOTO_KEY = 'fotoPerfilDataUrl';
+		const saved = localStorage.getItem(FOTO_KEY);
+		if (saved && globalImg) {
+			globalImg.src = saved;
+		}
+	});
+	</script>
 
 </body>
 </html>
+
