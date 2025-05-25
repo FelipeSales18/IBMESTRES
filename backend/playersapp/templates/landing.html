@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Bem-vindo{% endblock %}
+{% block content %}
+<div class="d-flex flex-column align-items-center justify-content-center" style="height: 60vh;">
+    <h1>Bem-vindo!</h1>
+    <div class="mt-4">
+        <a href="{% url 'login' %}" class="btn btn-primary btn-lg m-2">Login</a>
+        <a href="{% url 'register' %}" class="btn btn-success btn-lg m-2">Criar Conta</a>
+    </div>
+</div>
+{% endblock %}

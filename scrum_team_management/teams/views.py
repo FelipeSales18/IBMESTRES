@@ -23,11 +23,13 @@ class TeamDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         team = context['team']
-        assignments = team.teamassignment_set.all()
+        assignments = team.teamassignment_set.select_related('user').all()
         context['team_leader'] = assignments.filter(role="Team Leader").first()
         context['product_owners'] = assignments.filter(role__in=["Internal PO", "External PO"])
         context['developers'] = assignments.filter(role="Developer")
         context['testers'] = assignments.filter(role="Tester")
+        # Adicione todos os membros
+        context['all_members'] = [a.user for a in assignments]
         return context
 
 class TeamCreateView(LoginRequiredMixin, TeamLeaderRequiredMixin, CreateView):

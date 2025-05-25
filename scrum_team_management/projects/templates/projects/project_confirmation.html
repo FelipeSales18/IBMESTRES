@@ -12,7 +12,7 @@
                 <p>What would you like to do next?</p>
                 <div class="d-flex justify-content-around">
                     <!-- Replace the URLs with appropriate patterns once implemented -->
-                    <a href="{% url 'create_team_manually' project_id=project.id %}" class="btn btn-primary">Create Team Manually</a>
+                    <a href="{% url 'manual_team_create' project_id=project.id %}" class="btn btn-primary">Criar Manualmente</a>
                     <a href="{% url 'generate_team' project_id=project.id %}" class="btn btn-info">Generate Best Team</a>
                 </div>
             </div>

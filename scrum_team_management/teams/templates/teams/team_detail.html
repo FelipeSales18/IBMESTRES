@@ -54,6 +54,17 @@
                 {% endfor %}
               </ul>
             {% endif %}
+            <h6>All Members</h6>
+            <ul class="list-group mb-2">
+              {% for assignment in team.teamassignment_set.all %}
+                <li class="list-group-item">
+                  {{ assignment.user.get_full_name|default:assignment.user.username }}
+                  <span class="badge bg-secondary">{{ assignment.role }}</span>
+                </li>
+              {% empty %}
+                <li class="list-group-item text-muted">No members assigned.</li>
+              {% endfor %}
+            </ul>
           </div>
           <!-- Right Column: Team Details & Project info -->
           <div class="col-md-6">
