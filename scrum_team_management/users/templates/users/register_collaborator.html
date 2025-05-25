@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Register as Collaborator{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white text-center">
+                <h3 class="mb-0">Collaborator Registration</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="row mb-3 align-items-center justify-content-center">
+                            <label for="{{ field.id_for_label }}" class="col-sm-3 col-form-label text-sm-end">{{ field.label }}</label>
+                            <div class="col-sm-6">
+                                {% if field.name == 'roles_preferred' %}
+                                    <div class="checkbox-group">
+                                        {{ field }}
+                                    </div>
+                                {% else %}
+                                    {{ field }}
+                                {% endif %}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <button class="btn btn-success w-100" type="submit">Register as Collaborator</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+.checkbox-group input[type="checkbox"] {
+    margin-right: 5px;
+}
+</style>
+{% endblock %}

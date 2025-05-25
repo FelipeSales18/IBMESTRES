@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Project Detail{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <!-- Project Header with Edit/Delete Options -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">{{ project.name }}</h3>
+                <div>
+                    {% if user.is_authenticated and user.role == 'team_leader' %}
+                        <a class="btn btn-light btn-sm" href="{% url 'project_update' project.pk %}">Edit</a>
+                        <a class="btn btn-danger btn-sm" href="{% url 'project_delete' project.pk %}">Delete</a>
+                    {% else %}
+                        <button class="btn btn-light btn-sm" disabled>Edit</button>
+                        <button class="btn btn-danger btn-sm" disabled>Delete</button>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- Main Content Split into Two Columns -->
+            <div class="card-body">
+                <div class="row">
+                    <!-- Left Column: Project Description -->
+                    <div class="col-md-8">
+                        <p><strong>Description:</strong></p>
+                        <p>{{ project.description }}</p>
+                    </div>
+                    <!-- Right Column: Team & Members -->
+                    <div class="col-md-4">
+                        <p><strong>Team:</strong></p>
+                        {% if project.teams.all %}
+                            {% with team=project.teams.first %}
+                                <p>{{ team.name }}</p>
+                                <ul class="list-group">
+                                    {% for assignment in team.teamassignment_set.all %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ assignment.user.get_full_name }}
+                                            <span class="badge bg-secondary">{{ assignment.role }}</span>
+                                        </li>
+                                    {% empty %}
+                                        <li class="list-group-item text-muted">No members assigned.</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endwith %}
+                        {% else %}
+                            <p class="text-muted">No team assigned.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Latest Project Update Section -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Latest Project Update</h5>
+            </div>
+            <div class="card-body">
+                {% if project.updates.all %}
+                    {% for update in project.updates.all %}
+                        {% if forloop.first %}
+                            <p>{{ update.update_text }}</p>
+                            <p class="text-muted"><small>{{ update.created_at }}</small></p>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No updates available.</p>
+                {% endif %}
+            </div>
+        </div>
+        <!-- New Update Button -->
+        <div class="d-flex justify-content-end">
+            {% if user.is_authenticated and user == project.team_leader %}
+                <a href="{% url 'project_update' project.pk %}" class="btn btn-primary">Add New Update</a>
+            {% else %}
+                <button class="btn btn-primary" disabled>Add New Update</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

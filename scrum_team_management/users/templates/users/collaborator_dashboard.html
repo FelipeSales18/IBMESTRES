@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Collaborator Dashboard{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- Sidebar: Teams -->
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">My Teams</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for team in teams %}
+                    <li class="list-group-item">
+                        <a href="{% url 'team-detail' team.pk %}">{{ team.name }}</a>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">You are not assigned to any teams.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <!-- Main: Projects -->
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">My Projects</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for project in projects %}
+                    <li class="list-group-item">
+                        <a href="{% url 'project_detail' project.pk %}">{{ project.name }}</a>
+                        <span class="text-muted small">({{ project.description|truncatechars:40 }})</span>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">You are not assigned to any projects.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

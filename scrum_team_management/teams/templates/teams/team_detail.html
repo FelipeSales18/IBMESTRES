@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Team Detail{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow-sm mb-3">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">{{ team.name }}</h3>
+        <div>
+          {% if user.is_authenticated and user.role == 'team_leader' %}
+            <a class="btn btn-secondary" href="{% url 'team-update' team.pk %}">Edit</a>
+            <a class="btn btn-danger" href="{% url 'team-delete' team.pk %}">Delete</a>
+          {% else %}
+            <button class="btn btn-secondary" disabled>Edit</button>
+            <button class="btn btn-danger" disabled>Delete</button>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- Left Column: Team Members grouped by role -->
+          <div class="col-md-6">
+            <h5>Team Members</h5>
+            {% if team_leader %}
+              <h6>Team Leader</h6>
+              <ul class="list-group mb-2">
+                <li class="list-group-item">{{ team_leader.get_full_name }}</li>
+              </ul>
+            {% endif %}
+            {% if product_owners %}
+              <h6>Product Owners</h6>
+              <ul class="list-group mb-2">
+                {% for member in product_owners %}
+                  <li class="list-group-item">
+                    {{ member.get_full_name }} 
+                    <span class="badge bg-secondary">{{ member.role }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% if developers %}
+              <h6>Developers</h6>
+              <ul class="list-group mb-2">
+                {% for member in developers %}
+                  <li class="list-group-item">{{ member.get_full_name }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% if testers %}
+              <h6>Testers</h6>
+              <ul class="list-group mb-2">
+                {% for member in testers %}
+                  <li class="list-group-item">{{ member.get_full_name }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+          <!-- Right Column: Team Details & Project info -->
+          <div class="col-md-6">
+            <h5>Team Details</h5>
+            <p><strong>Description:</strong> {{ team.description }}</p>
+            {% if team.project %}
+              <p>
+                <strong>Project:</strong>
+                <a href="{% url 'project_detail' team.project.pk %}">{{ team.project.name }}</a>
+              </p>
+              <p><strong>Project Created:</strong> {{ team.project.created_at }}</p>
+            {% else %}
+              <p class="text-muted">No project assigned.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

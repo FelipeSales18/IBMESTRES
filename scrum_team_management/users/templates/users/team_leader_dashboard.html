@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Team Leader Dashboard{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- Sidebar: Teams -->
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span>Teams You Manage</span>
+                <a href="{% url 'team-create' %}" class="btn btn-light btn-sm">+ New Team</a>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for team in teams %}
+                    <li class="list-group-item">
+                        <a href="{% url 'team-detail' team.pk %}">{{ team.name }}</a>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">You are not managing any teams.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <!-- Main: Projects -->
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <span>Projects You Lead</span>
+                <a href="{% url 'project_create' %}" class="btn btn-light btn-sm">+ New Project</a>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for project in projects %}
+                    <li class="list-group-item">
+                        <a href="{% url 'project_detail' project.pk %}">{{ project.name }}</a>
+                        <span class="text-muted small">({{ project.description|truncatechars:40 }})</span>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">You are not leading any projects.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

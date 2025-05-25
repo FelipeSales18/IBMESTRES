@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}SCRUM Team Manager{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <img src="{% static 'img/logo.png' %}" alt="Logo" width="40" height="40" class="me-2">
+            <span>SCRUM Team Manager</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    {% if user.is_authenticated and user.role == 'team_leader' %}
+                        <a class="nav-link" href="{% url 'team_leader_dashboard' %}">Dashboard</a>
+                    {% elif user.is_authenticated and user.role == 'collaborator' %}
+                        <a class="nav-link" href="{% url 'collaborator_dashboard' %}">Dashboard</a>
+                    {% else %}
+                        <a class="nav-link disabled" tabindex="-1" aria-disabled="true">Dashboard</a>
+                    {% endif %}
+                </li>
+                <li class="nav-item">
+                    {% if user.is_authenticated %}
+                        <a class="nav-link" href="{% url 'profile' user_id=user.id %}">Profile</a>
+                    {% else %}
+                        <a class="nav-link disabled" tabindex="-1" aria-disabled="true">Profile</a>
+                    {% endif %}
+                </li>
+                <li class="nav-item">
+                    {% if user.is_authenticated %}
+                        <a class="nav-link" href="{% url 'team-list' %}">Teams</a>
+                    {% else %}
+                        <a class="nav-link disabled" tabindex="-1" aria-disabled="true">Teams</a>
+                    {% endif %}
+                </li>
+                <li class="nav-item">
+                    {% if user.is_authenticated %}
+                        <a class="nav-link" href="{% url 'project_list' %}">Projects</a>
+                    {% else %}
+                        <a class="nav-link disabled" tabindex="-1" aria-disabled="true">Projects</a>
+                    {% endif %}
+                </li>
+                <li class="nav-item">
+                    {% if user.is_authenticated and user.role == 'team_leader' %}
+                        <a class="nav-link" href="{% url 'collaborators_list' %}">Collaborators</a>
+                    {% endif %}
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                {% if user.is_authenticated %}
+                    <li class="nav-item d-flex align-items-center gap-2">
+                        <span class="badge {% if user.role == 'team_leader' %}bg-primary{% else %}bg-success{% endif %}">
+                            {{ user.get_role_display }}
+                        </span>
+                        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-link nav-link" style="display:inline; padding:0;">Logout</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register_select' %}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>

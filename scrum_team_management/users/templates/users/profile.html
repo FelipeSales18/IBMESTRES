@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">{{ user_profile.first_name }} {{ user_profile.last_name }}'s Profile</h3>
+            </div>
+            <div class="card-body">
+                <p><strong>Email:</strong> {{ user_profile.email }}</p>
+                <p><strong>Role:</strong> {{ user_profile.get_role_display }}</p>
+                <p><strong>Age:</strong> {{ user_profile.age }}</p>
+                <p><strong>Best Competency:</strong> {{ user_profile.best_competency }}</p>
+                <p><strong>Other Competencies:</strong>
+                    {% if user_profile.competencies.all %}
+                        <ul>
+                        {% for comp in user_profile.competencies.all %}
+                            <li>{{ comp.skill_name }} (Level {{ comp.proficiency_level }})</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <span class="text-muted">None listed</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
