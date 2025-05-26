@@ -9,6 +9,7 @@ class Project(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     team_leader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='projects_lead')
+    preferred_competencies = models.TextField(blank=True, help_text="Enter the preferred competencies for this project, one per line.")
 
     def __str__(self):
         return self.name

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from .models import Competency
+from .models import Competency, User
 
 User = get_user_model()
 
@@ -107,4 +107,54 @@ class TeamLeaderRegisterForm(forms.ModelForm):
         user.set_password(self.cleaned_data['password1'])
         if commit:
             user.save()
+        return user
+
+class UserEditForm(forms.ModelForm):
+    roles_preferred = forms.MultipleChoiceField(
+        choices=ROLE_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Preferred Roles"
+    )
+    competencies = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 3}),
+        help_text="Enter one competency per line."
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            'first_name', 'last_name', 'email', 'age',
+            'years_of_experience', 'best_competency', 'roles_preferred'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Prepopulate roles_preferred as a list
+        if self.instance.pk and self.instance.roles_preferred:
+            self.fields['roles_preferred'].initial = [
+                r.strip() for r in self.instance.roles_preferred.split(',')
+            ]
+        # Prepopulate competencies field with user's current competencies (except best)
+        if self.instance.pk:
+            comps = self.instance.competencies.exclude(pk=self.instance.best_competency_id)
+            self.fields['competencies'].initial = '\n'.join([c.skill_name for c in comps])
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        # Save preferred roles as comma-separated string
+        roles = self.cleaned_data.get('roles_preferred', [])
+        user.roles_preferred = ','.join(roles)
+        if commit:
+            user.save()
+            # Update competencies
+            comps_str = self.cleaned_data.get('competencies', '')
+            comps = [c.strip() for c in comps_str.split('\n') if c.strip()]
+            # Remove old (non-best) competencies
+            user.competencies.exclude(pk=user.best_competency_id).delete()
+            # Add new competencies
+            for c in comps:
+                if not user.competencies.filter(skill_name__iexact=c).exists():
+                    Competency.objects.create(user=user, skill_name=c)
         return user

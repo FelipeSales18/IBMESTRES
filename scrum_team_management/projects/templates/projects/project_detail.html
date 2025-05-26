@@ -32,14 +32,45 @@
                             {% with team=project.teams.first %}
                                 <p>{{ team.name }}</p>
                                 <ul class="list-group">
+                                    {# Team Leader #}
                                     {% for assignment in team.teamassignment_set.all %}
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            {{ assignment.user.get_full_name }}
-                                            <span class="badge bg-secondary">{{ assignment.role }}</span>
-                                        </li>
-                                    {% empty %}
-                                        <li class="list-group-item text-muted">No members assigned.</li>
+                                        {% if assignment.role == "Team Leader" %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                {{ assignment.user.get_full_name }}
+                                                <span class="badge bg-primary">{{ assignment.role }}</span>
+                                            </li>
+                                        {% endif %}
                                     {% endfor %}
+                                    {# Internal PO #}
+                                    {% for assignment in team.teamassignment_set.all %}
+                                        {% if assignment.role == "Internal PO" %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                {{ assignment.user.get_full_name }}
+                                                <span class="badge bg-primary">{{ assignment.role }}</span>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {# External PO #}
+                                    {% for assignment in team.teamassignment_set.all %}
+                                        {% if assignment.role == "External PO" %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                {{ assignment.user.get_full_name }}
+                                                <span class="badge bg-primary">{{ assignment.role }}</span>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {# Collaborators #}
+                                    {% for assignment in team.teamassignment_set.all %}
+                                        {% if assignment.role == "Collaborator" %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                {{ assignment.user.get_full_name }}
+                                                <span class="badge bg-secondary">{{ assignment.role }}</span>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if team.teamassignment_set.count == 0 %}
+                                        <li class="list-group-item text-muted">No members assigned.</li>
+                                    {% endif %}
                                 </ul>
                             {% endwith %}
                         {% else %}
@@ -75,6 +106,12 @@
                 <button class="btn btn-primary" disabled>Add New Update</button>
             {% endif %}
         </div>
+        <!-- Add or Create Team Button -->
+        {% if not project.teams.exists %}
+        <div class="d-flex justify-content-end mt-3">
+            <a href="{% url 'add_team_to_project' project.id %}" class="btn btn-success">Add or Create Team</a>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

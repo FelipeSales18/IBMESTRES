@@ -31,6 +31,40 @@
                         {% endfor %}
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Membros obrigatórios</label>
+                        <ul class="list-group mb-2">
+                            <li class="list-group-item">
+                                <strong>Líder da Equipe:</strong> {{ team_leader.get_full_name|default:team_leader.username }} (você)
+                            </li>
+                            <li class="list-group-item">
+                                <strong>PO Interno:</strong>
+                                <select name="internal_po" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                    {% for colaborador in colaboradores %}
+                                        {% if colaborador.is_internal_po %}
+                                            <option value="{{ colaborador.id }}" selected>{{ colaborador.get_full_name|default:colaborador.username }}</option>
+                                        {% else %}
+                                            <option value="{{ colaborador.id }}">{{ colaborador.get_full_name|default:colaborador.username }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>PO Externo:</strong>
+                                <select name="external_po" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                    {% for colaborador in colaboradores %}
+                                        {% if colaborador.is_external_po %}
+                                            <option value="{{ colaborador.id }}" selected>{{ colaborador.get_full_name|default:colaborador.username }}</option>
+                                        {% else %}
+                                            <option value="{{ colaborador.id }}">{{ colaborador.get_full_name|default:colaborador.username }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Colaboradores disponíveis</label>
                         <table class="table table-bordered table-hover">
                             <thead>
@@ -80,10 +114,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectedCount = document.getElementById('selected-count');
     function updateCount() {
         const max = parseInt(numMembersSelect.value);
+        const required = 3; // Team Leader, Internal PO, External PO
         let checked = 0;
         checkboxes.forEach(cb => { if (cb.checked) checked++; });
-        selectedCount.textContent = `Selecionados: ${checked} / ${max}`;
-        if (checked >= max) {
+        selectedCount.textContent = `Selecionados: ${checked + required} / ${max}`;
+        if ((checked + required) >= max) {
             checkboxes.forEach(cb => { if (!cb.checked) cb.disabled = true; });
         } else {
             checkboxes.forEach(cb => { cb.disabled = false; });

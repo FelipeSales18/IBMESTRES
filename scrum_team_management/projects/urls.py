@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import manual_team_create
+from .views import manual_team_create, add_team_to_project
 
 urlpatterns = [
     path('', views.ProjectListView.as_view(), name='project_list'),
@@ -12,4 +12,5 @@ urlpatterns = [
     path('<int:project_id>/create-team-manually/', views.manual_team_create, name='manual_team_create'),
     path('<int:project_id>/generate-team/', views.generate_team_view, name='generate_team'),
     path('<int:project_id>/manual_team_create/', manual_team_create, name='manual_team_create'),
+    path('<int:project_id>/add-team/', add_team_to_project, name='add_team_to_project'),
 ]

@@ -12,6 +12,7 @@ from django.http import HttpResponse
 import random
 from datetime import datetime
 from django.utils import timezone
+from django.db.models import Q
 
 # Funções utilitárias para seleção balanceada
 def get_collaborators_by_skill(collaborators, skill):
@@ -89,67 +90,206 @@ class ProjectConfirmationView(LoginRequiredMixin, TeamLeaderRequiredMixin, Detai
     
 def manual_team_create(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
-    colaboradores = User.objects.filter(role='collaborator')
+    all_collaborators = User.objects.filter(role='collaborator')
+    project_competencies = [c.strip().lower() for c in (project.preferred_competencies or '').splitlines() if c.strip()]
+    team_leader = request.user
+
+    # Exclude the team leader from collaborators list
+    collaborators = all_collaborators.exclude(id=team_leader.id)
+
+    # Helper: count how many project competencies the user has
+    def competency_match_count(user):
+        if not hasattr(user, 'roles_preferred') or not user.roles_preferred:
+            return 0
+        user_competencies = [c.strip().lower() for c in user.roles_preferred.split(',')]
+        return sum(1 for pc in project_competencies if pc in user_competencies)
+
+    # Sort collaborators: more matches first
+    sorted_collaborators = sorted(
+        collaborators,
+        key=lambda user: competency_match_count(user),
+        reverse=True
+    )
+
+    ids = [user.id for user in sorted_collaborators]
+
     if request.method == 'POST':
         form = ManualTeamForm(request.POST)
-        form.fields['members'].queryset = colaboradores
+        form.fields['members'].queryset = User.objects.filter(id__in=ids)
         if form.is_valid():
             name = form.cleaned_data['name']
             num_members = int(form.cleaned_data['num_members'])
             members = form.cleaned_data['members']
+            total_selected = members.count() + 3  # 3 required roles
+
             if not name.strip():
                 form.add_error('name', "O nome da equipe é obrigatório.")
-            if not (3 <= members.count() <= 10):
-                form.add_error('members', "Selecione entre 3 e 10 colaboradores.")
-            elif members.count() != num_members:
-                form.add_error('members', f"Selecione exatamente {num_members} colaboradores.")
+            if not (3 <= total_selected <= 10):
+                form.add_error('members', "Selecione entre 3 e 10 membros (incluindo os obrigatórios).")
+            elif total_selected != num_members:
+                form.add_error('members', f"Selecione exatamente {num_members} membros (incluindo os obrigatórios).")
             if not form.errors:
                 team = Team.objects.create(name=name, project=project)
                 # Crie um TeamAssignment para cada membro selecionado
                 for member in members:
                     TeamAssignment.objects.create(team=team, user=member, role='Collaborator')
+                # Create TeamAssignment for Team Leader
+                TeamAssignment.objects.create(team=team, user=team_leader, role='Team Leader')
+                # Create TeamAssignment for Internal PO
+                internal_po = User.objects.get(id=request.POST.get('internal_po'))
+                TeamAssignment.objects.create(team=team, user=internal_po, role='Internal PO')
+                # Create TeamAssignment for External PO
+                external_po = User.objects.get(id=request.POST.get('external_po'))
+                TeamAssignment.objects.create(team=team, user=external_po, role='External PO')
                 messages.success(request, f"Equipe '{name}' criada com sucesso!")
                 return redirect('project_detail', pk=project.pk)
     else:
         form = ManualTeamForm()
-        form.fields['members'].queryset = colaboradores
+        form.fields['members'].queryset = User.objects.filter(id__in=ids)
+
     return render(request, 'projects/manual_team_create.html', {
         'form': form,
-        'colaboradores': colaboradores,
+        'colaboradores': sorted_collaborators,
         'project': project,
+        'team_leader': team_leader,
+        'project_competencies': project_competencies,
     })
 
 def generate_team_view(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
     collaborators = list(User.objects.filter(role='collaborator'))
-    min_size, max_size = 3, 10
+    min_size, max_size = 4, 10
+
+    # Helper functions for algorithms
+    def greedy_team(collaborators, project_competencies, team_size):
+        def score(user):
+            # 1. Competency match count
+            user_comp = [c.skill_name.strip().lower() for c in user.competencies.all()]
+            competency_matches = len(set(user_comp) & set(project_competencies))
+
+            # 2. Preferred role match (1 if matches, 0 if not)
+            # We'll check if any of the user's preferred roles matches the required roles for the team
+            # For simplicity, let's assume you want to prioritize Internal PO, External PO, Collaborator
+            preferred_roles = [r.strip().lower() for r in (user.roles_preferred or '').split(',')]
+            # You can adjust this list as needed
+            required_roles = ['internal po', 'external po', 'collaborator']
+            role_match = int(any(role in required_roles for role in preferred_roles))
+
+            # 3. Years of experience
+            years = getattr(user, 'years_of_experience', 0) or 0
+
+            # Return a tuple for sorting: higher is better
+            return (competency_matches, role_match, years)
+        sorted_collabs = sorted(collaborators, key=score, reverse=True)
+        return sorted_collabs[:team_size]
+
+    def balanced_team(collaborators, project_competencies, team_size):
+        selected = []
+        used_competencies = set()
+        for comp in project_competencies:
+            for user in collaborators:
+                user_comp = [c.skill_name.strip().lower() for c in user.competencies.all()]
+                if comp in user_comp and user not in selected:
+                    selected.append(user)
+                    used_competencies.update(user_comp)
+                    break
+        for user in collaborators:
+            user_comp = set([c.skill_name.strip().lower() for c in user.competencies.all()])
+            if user not in selected and not user_comp.issubset(used_competencies):
+                selected.append(user)
+                used_competencies.update(user_comp)
+            if len(selected) >= team_size:
+                break
+        if len(selected) < team_size:
+            for user in collaborators:
+                if user not in selected:
+                    selected.append(user)
+                if len(selected) >= team_size:
+                    break
+        return selected[:team_size]
+
+    def random_team(collaborators, team_size):
+        import random
+        return random.sample(collaborators, min(team_size, len(collaborators)))
+
+    project_competencies = [c.strip().lower() for c in (project.preferred_competencies or '').splitlines() if c.strip()]
 
     if request.method == 'POST':
-        member_ids = request.POST.getlist('members')
         team_name = request.POST.get('team_name')
-        mode = request.POST.get('mode')
-        if not member_ids or not team_name or mode != 'auto':
-            messages.error(request, "Dados inválidos para criação automática.")
+        num_members = int(request.POST.get('num_members', 4))
+        algorithm = request.POST.get('algorithm', 'balanced')
+
+        # Exclude current user from pool
+        pool = [u for u in collaborators if u != request.user]
+
+        # Generate the rest of the team (N-1 members)
+        team_size = num_members - 1
+        if algorithm == 'greedy':
+            generated_members = greedy_team(pool, project_competencies, team_size)
+        elif algorithm == 'balanced':
+            generated_members = balanced_team(pool, project_competencies, team_size)
+        else:
+            generated_members = random_team(pool, team_size)
+
+        # Ensure enough members
+        if len(generated_members) < team_size:
+            messages.error(request, "Não foi possível selecionar membros suficientes para a equipe.")
             return redirect('generate_team', project_id=project.id)
-        if not (min_size <= len(member_ids) <= max_size):
-            messages.error(request, f"Selecione entre {min_size} e {max_size} membros.")
-            return redirect('generate_team', project_id=project.id)
-        # Cria o time e associa membros
+
+        # Assign roles: current user = Team Leader, then Internal PO, External PO, rest Collaborators
         team = Team.objects.create(name=team_name, project=project)
-        for member_id in member_ids:
-            user = User.objects.get(id=member_id)
-            TeamAssignment.objects.create(team=team, user=user, role='Collaborator')
+        TeamAssignment.objects.create(team=team, user=request.user, role="Team Leader")
+        for idx, member in enumerate(generated_members):
+            if idx == 0:
+                role = "Internal PO"
+            elif idx == 1:
+                role = "External PO"
+            else:
+                role = "Collaborator"
+            TeamAssignment.objects.create(team=team, user=member, role=role)
         messages.success(request, f"Equipe '{team_name}' criada com sucesso!")
         return redirect('project_detail', pk=project.pk)
 
-    # GET: gera sugestão automática
-    suggested_team = generate_balanced_team(collaborators, min_size, max_size)
-    timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
-    default_team_name = f"Team {project.id}-{timestamp}"
+    # GET: show form and suggested team
+    default_team_name = f"Team {project.id}"
+    suggested_team = []
+    algorithm = request.GET.get('algorithm', 'greedy')
+    num_members = int(request.GET.get('num_members', 4))
+    pool = [u for u in collaborators if u != request.user]
+    if algorithm == 'greedy':
+        generated_members = greedy_team(pool, project_competencies, num_members - 1)
+    elif algorithm == 'balanced':
+        generated_members = balanced_team(pool, project_competencies, num_members - 1)
+    else:
+        generated_members = random_team(pool, num_members - 1)
+
+    # For display: current user first, then generated members
+    suggested_team = [request.user] + generated_members
+
     return render(request, 'projects/generate_team.html', {
         'project': project,
         'suggested_team': suggested_team,
         'default_team_name': default_team_name,
         'min_size': min_size,
         'max_size': max_size,
+    })
+
+def add_team_to_project(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    # Teams without a project assigned
+    available_teams = Team.objects.filter(project__isnull=True)
+
+    if request.method == 'POST':
+        team_id = request.POST.get('team_id')
+        if team_id:
+            team = get_object_or_404(Team, pk=team_id)
+            team.project = project
+            team.save()
+            messages.success(request, f"Equipe '{team.name}' atribuída ao projeto!")
+            return redirect('project_detail', pk=project.pk)
+        # If no team selected, just reload the page (could add error handling)
+
+    return render(request, 'projects/add_team_to_project.html', {
+        'project': project,
+        'available_teams': available_teams,
     })

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Gerar Equipe Automática{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white text-center">
+                <h3 class="mb-0">Gerar Equipe Automática</h3>
+            </div>
+            <div class="card-body">
+                <!-- Generate Team Form (GET) -->
+                <form method="get" class="mb-4">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Nome do Time:</strong></label>
+                        <input type="text" class="form-control" name="team_name" value="{{ request.GET.team_name|default:default_team_name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Número de Membros:</strong></label>
+                        <select class="form-select" name="num_members">
+                            <option value="4" {% if request.GET.num_members == "4" %}selected{% endif %}>4</option>
+                            <option value="5" {% if request.GET.num_members == "5" %}selected{% endif %}>5</option>
+                            <option value="6" {% if request.GET.num_members == "6" %}selected{% endif %}>6</option>
+                            <option value="7" {% if request.GET.num_members == "7" %}selected{% endif %}>7</option>
+                            <option value="8" {% if request.GET.num_members == "8" %}selected{% endif %}>8</option>
+                            <option value="9" {% if request.GET.num_members == "9" %}selected{% endif %}>9</option>
+                            <option value="10" {% if request.GET.num_members == "10" %}selected{% endif %}>10</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Algoritmo:</strong></label>
+                        <select class="form-select" name="algorithm">
+                            <option value="balanced" {% if request.GET.algorithm == "balanced" %}selected{% endif %}>Balanced</option>
+                            <option value="greedy" {% if request.GET.algorithm == "greedy" %}selected{% endif %}>Greedy</option>
+                            <option value="random" {% if request.GET.algorithm == "random" %}selected{% endif %}>Random</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success w-100" type="submit">Gerar Equipe</button>
+                </form>
+
+                {% if suggested_team %}
+                <!-- Show generated team and accept button only if a team was generated -->
+                <div class="mb-3">
+                    <label class="form-label"><strong>Colaboradores Selecionados ({{ suggested_team|length }}):</strong></label>
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Função na Equipe</th>
+                                <th>Melhor Competência</th>
+                                <th>Anos de Experiência</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member in suggested_team %}
+                            <tr>
+                                <td>{{ member.get_full_name|default:member.username }}</td>
+                                <td>
+                                    {% if forloop.first %}
+                                        Team Leader
+                                    {% elif forloop.counter == 2 %}
+                                        Internal PO
+                                    {% elif forloop.counter == 3 %}
+                                        External PO
+                                    {% else %}
+                                        Collaborator
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ member.best_competency|default:"-" }}
+                                </td>
+                                <td>
+                                    {{ member.years_of_experience|default:"-" }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Accept Team Form (POST) -->
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="team_name" value="{{ request.GET.team_name|default:default_team_name }}">
+                    <input type="hidden" name="num_members" value="{{ request.GET.num_members|default:'4' }}">
+                    <input type="hidden" name="algorithm" value="{{ request.GET.algorithm|default:'balanced' }}">
+                    <button class="btn btn-primary w-100" type="submit">Aceitar Equipe</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@ from django.views.generic import CreateView, DetailView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from .forms import CollaboratorRegisterForm, TeamLeaderRegisterForm
+from .forms import CollaboratorRegisterForm, TeamLeaderRegisterForm, UserEditForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.views import View
@@ -97,3 +97,14 @@ def collaborators_list_view(request):
     team_leaders = User.objects.filter(role='team_leader').order_by('last_name', 'first_name')
     users = list(team_leaders) + list(collaborators)
     return render(request, 'users/collaborators_list.html', {'collaborators': users})
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile', user_id=request.user.pk)
+    else:
+        form = UserEditForm(instance=request.user)
+    return render(request, 'users/profile_edit.html', {'form': form})

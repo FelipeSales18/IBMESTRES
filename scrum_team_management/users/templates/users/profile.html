@@ -1,28 +1,69 @@
 {% extends 'base.html' %}
+{% load user_extras %}
 {% block title %}Profile{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">{{ user_profile.first_name }} {{ user_profile.last_name }}'s Profile</h3>
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">{{ user_profile.first_name }} {{ user_profile.last_name }}</h3>
+                {% if user.is_authenticated and user == user_profile %}
+                    <a href="{% url 'edit-profile' %}" class="btn btn-light btn-sm">Edit Profile</a>
+                {% endif %}
             </div>
             <div class="card-body">
-                <p><strong>Email:</strong> {{ user_profile.email }}</p>
-                <p><strong>Role:</strong> {{ user_profile.get_role_display }}</p>
-                <p><strong>Age:</strong> {{ user_profile.age }}</p>
-                <p><strong>Best Competency:</strong> {{ user_profile.best_competency }}</p>
-                <p><strong>Other Competencies:</strong>
-                    {% if user_profile.competencies.all %}
-                        <ul>
-                        {% for comp in user_profile.competencies.all %}
-                            <li>{{ comp.skill_name }} (Level {{ comp.proficiency_level }})</li>
-                        {% endfor %}
-                        </ul>
-                    {% else %}
-                        <span class="text-muted">None listed</span>
-                    {% endif %}
-                </p>
+                <table class="table table-borderless mb-4">
+                    <tr>
+                        <th>Email:</th>
+                        <td>{{ user_profile.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Role:</th>
+                        <td>{{ user_profile.get_role_display }}</td>
+                    </tr>
+                    <tr>
+                        <th>Age:</th>
+                        <td>{{ user_profile.age }}</td>
+                    </tr>
+                    <tr>
+                        <th>Best Competency:</th>
+                        <td>
+                            {% if user_profile.best_competency %}
+                                <span class="badge bg-success">{{ user_profile.best_competency }}</span>
+                            {% else %}
+                                <span class="text-muted">None listed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Other Competencies:</th>
+                        <td>
+                            {% if user_profile.competencies.all %}
+                                <ul class="mb-0">
+                                {% for comp in user_profile.competencies.all %}
+                                    {% if user_profile.best_competency != comp %}
+                                        <li>{{ comp.skill_name }}</li>
+                                    {% endif %}
+                                {% endfor %}
+                                </ul>
+                            {% else %}
+                                <span class="text-muted">None listed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Preferred Roles:</th>
+                        <td>
+                            {% if user_profile.roles_preferred %}
+                                {% for role in user_profile.roles_preferred|split:"," %}
+                                    <span class="badge bg-info text-dark">{{ role|trim }}</span>    
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">None listed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
