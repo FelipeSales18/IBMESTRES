@@ -1,28 +1,31 @@
 {% extends 'base.html' %}
-{% block title %}Edit Team{% endblock %}
+{% block title %}Editar Equipe{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-md-8">
         <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">Edit Team</h3>
+            <div class="card-header bg-primary text-white text-center">
+                <h3 class="mb-0">Editar Equipe</h3>
             </div>
             <div class="card-body">
                 <form method="post" novalidate>
                     {% csrf_token %}
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.help_text %}
-                                <div class="form-text">{{ field.help_text }}</div>
-                            {% endif %}
-                            {% for error in field.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                    <button class="btn btn-primary w-100" type="submit">Save Changes</button>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.name.id_for_label }}">Nome da Equipe</label>
+                        {{ form.name }}
+                        {% for error in form.name.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.description.id_for_label }}">Descrição</label>
+                        {{ form.description }}
+                        {% for error in form.description.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {# Add other fields as needed, following the same pattern #}
+                    <button class="btn btn-primary w-100" type="submit">Editar Equipe</button>
                 </form>
             </div>
         </div>

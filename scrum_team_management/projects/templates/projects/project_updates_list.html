@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Project Updates{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">All Updates for {{ project.name }}</h3>
+            </div>
+            <div class="card-body">
+                {% if updates %}
+                    <ul class="list-group">
+                        {% for update in updates %}
+                            <li class="list-group-item mb-3">
+                                <div class="mb-1 text-muted small">
+                                    <strong>Date:</strong> {{ update.created_at|date:"F j, Y, H:i" }}
+                                </div>
+                                <div class="mb-1">
+                                    <strong>What was done:</strong><br>
+                                    {{ update.what_was_done }}
+                                </div>
+                                <div class="mb-1">
+                                    <strong>How the project is going:</strong><br>
+                                    {{ update.how_project_is_going }}
+                                </div>
+                                <div>
+                                    <strong>Setbacks:</strong><br>
+                                    {{ update.setbacks|default:"None" }}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No updates available for this project.</p>
+                {% endif %}
+                <div class="mt-3">
+                    <a href="{% url 'project_detail' project.pk %}" class="btn btn-outline-secondary w-100">Back to Project</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -38,17 +38,17 @@
                     <tr>
                         <th>Other Competencies:</th>
                         <td>
-                            {% if user_profile.competencies.all %}
-                                <ul class="mb-0">
-                                {% for comp in user_profile.competencies.all %}
-                                    {% if user_profile.best_competency != comp %}
-                                        <li>{{ comp.skill_name }}</li>
-                                    {% endif %}
-                                {% endfor %}
-                                </ul>
-                            {% else %}
-                                <span class="text-muted">None listed</span>
-                            {% endif %}
+                            {% with others=user_profile.competencies.all %}
+                                {% if others %}
+                                    {% for comp in others %}
+                                        {% if user_profile.best_competency != comp %}
+                                            <span class="badge bg-secondary">{{ comp.skill_name }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">None listed</span>
+                                {% endif %}
+                            {% endwith %}
                         </td>
                     </tr>
                     <tr>

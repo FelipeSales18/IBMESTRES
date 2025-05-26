@@ -1,5 +1,6 @@
 from django import forms
-from .models import Project
+from .models import Project, ProjectUpdate
+from users.models import User
 
 class ProjectForm(forms.ModelForm):
     preferred_competencies = forms.CharField(
@@ -7,7 +8,22 @@ class ProjectForm(forms.ModelForm):
         help_text="Enter the preferred competencies for this project, one per line.",
         required=True
     )
+    testers = forms.ModelMultipleChoiceField(
+        queryset=User.objects.filter(role='collaborator'),
+        required=False,
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'})
+    )
 
     class Meta:
         model = Project
-        fields = ['name', 'description', 'preferred_competencies']
+        fields = ['name', 'description', 'preferred_competencies', 'testers']
+
+class ProjectUpdateForm(forms.ModelForm):
+    class Meta:
+        model = ProjectUpdate
+        fields = ['what_was_done', 'how_project_is_going', 'setbacks']
+        widgets = {
+            'what_was_done': forms.Textarea(attrs={'rows': 3}),
+            'how_project_is_going': forms.Textarea(attrs={'rows': 3}),
+            'setbacks': forms.Textarea(attrs={'rows': 2}),
+        }

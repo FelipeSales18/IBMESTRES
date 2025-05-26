@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Project
-from .forms import ProjectForm
+from .forms import ProjectForm, ProjectUpdateForm
 from teams.forms import ManualTeamForm
 from teams.models import Team, TeamAssignment
 from users.models import User
@@ -13,6 +13,7 @@ import random
 from datetime import datetime
 from django.utils import timezone
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 
 # Funções utilitárias para seleção balanceada
 def get_collaborators_by_skill(collaborators, skill):
@@ -67,6 +68,18 @@ class ProjectDetailView(LoginRequiredMixin, DetailView):
     model = Project
     template_name = 'projects/project_detail.html'
     context_object_name = 'project'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        project = self.object
+        # When rendering the detail page
+        collaborators = User.objects.filter(role='collaborator')
+        context.update({
+            'project': project,
+            'collaborators': collaborators,
+            # ... other context ...
+        })
+        return context
 
 class ProjectUpdateView(LoginRequiredMixin, TeamLeaderRequiredMixin, UpdateView):
     model = Project
@@ -293,3 +306,72 @@ def add_team_to_project(request, project_id):
         'project': project,
         'available_teams': available_teams,
     })
+
+@login_required
+def remove_team_from_project(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    if request.user.role != "team_leader":
+        messages.error(request, "Only the team leader can remove the team.")
+        return redirect('project_detail', pk=project_id)
+    if request.method == "POST":
+        # Remove all teams from this project (or adjust as needed)
+        project.teams.clear()
+        messages.success(request, "Team removed from project. You can now assign or create a new team.")
+    return redirect('project_detail', pk=project_id)
+
+@login_required
+def add_project_update(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    if request.user != project.team_leader:
+        return redirect('project_detail', pk=project_id)
+    if request.method == 'POST':
+        form = ProjectUpdateForm(request.POST)
+        if form.is_valid():
+            update = form.save(commit=False)
+            update.project = project
+            update.save()
+            return redirect('project_detail', pk=project_id)
+    else:
+        form = ProjectUpdateForm()
+    return render(request, 'projects/add_project_update.html', {'form': form, 'project': project})
+
+
+def project_updates_list(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    updates = project.updates.order_by('-created_at')
+    return render(request, 'projects/project_updates_list.html', {
+        'project': project,
+        'updates': updates,
+    })
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Project
+from .forms import ProjectForm
+
+@login_required
+def project_update(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    if request.user != project.team_leader:
+        return redirect('project_detail', pk=pk)
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            return redirect('project_detail', pk=pk)
+    else:
+        form = ProjectForm(instance=project)
+    return render(request, 'projects/project_form.html', {'form': form, 'project': project})
+
+@login_required
+def edit_project_testers(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    if request.user != project.team_leader:
+        return redirect('project_detail', pk=pk)
+    if request.method == 'POST':
+        tester_ids = request.POST.getlist('testers')
+        testers = User.objects.filter(pk__in=tester_ids, role='collaborator')
+        project.testers.set(testers)
+        project.save()
+        return redirect('project_detail', pk=pk)
+    return redirect('project_detail', pk=pk)
