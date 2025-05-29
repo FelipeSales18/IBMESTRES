@@ -13,9 +13,28 @@
             <div class="card-body">
                 <ul class="list-group">
                     {% for team in teams %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="{% url 'team-detail' team.pk %}">{{ team.name }}</a>
-                            <span class="text-muted small">{{ team.description|truncatechars:40 }}</span>
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <a href="{% url 'team-detail' team.pk %}" class="fw-bold">{{ team.name }}</a>
+                                    <div class="text-muted small">{{ team.description|truncatechars:40 }}</div>
+                                    <div class="mt-1">
+                                        {% for assignment in team.teamassignment_set.all %}
+                                            <span class="badge 
+                                                {% if assignment.role == 'Team Leader' %}bg-primary
+                                                {% elif assignment.role == 'Internal PO' %}bg-info text-dark
+                                                {% elif assignment.role == 'External PO' %}bg-warning text-dark
+                                                {% else %}bg-secondary
+                                                {% endif %}
+                                                me-1 mb-1">
+                                                {{ assignment.user.get_full_name|default:assignment.user.username }} ({{ assignment.role }})
+                                            </span>
+                                        {% empty %}
+                                            <span class="text-muted small">No members</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
                         </li>
                     {% empty %}
                         <li class="list-group-item">No teams found.</li>

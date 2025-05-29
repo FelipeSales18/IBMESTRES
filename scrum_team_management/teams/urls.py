@@ -9,4 +9,5 @@ urlpatterns = [
     path('<int:pk>/update/', views.TeamUpdateView.as_view(), name='team-update'),
     path('<int:pk>/delete/', views.TeamDeleteView.as_view(), name='team-delete'),
     path('collaborators/', collaborators_list_view, name='collaborators_list'),
+    path('<int:pk>/assign-external-po/', views.assign_external_po, name='assign_external_po'),
 ]

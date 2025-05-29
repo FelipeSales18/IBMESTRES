@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load teams_extras %}
 {% block title %}Team Detail{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
@@ -60,6 +61,34 @@
                 <li class="list-group-item text-muted">No members assigned.</li>
               {% endif %}
             </ul>
+            <!-- External PO Section -->
+            <h6>External PO</h6>
+            <ul class="list-group mb-2">
+              {% if team.teamassignment_set|has_external_po %}
+                {% with extpo=team.teamassignment_set|get_external_po %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ extpo.user.get_full_name|default:extpo.user.username }}
+                    <span class="badge bg-warning text-dark">{{ extpo.role }}</span>
+                  </li>
+                {% endwith %}
+              {% else %}
+                <li class="list-group-item text-muted">No External PO assigned.</li>
+              {% endif %}
+            </ul>
+            {% if user.is_authenticated and user.role == 'team_leader' %}
+              <form method="post" action="{% url 'assign_external_po' team.pk %}">
+                {% csrf_token %}
+                <div class="mb-2">
+                  <select name="external_po_id" class="form-select" required>
+                    <option value="">Select External PO</option>
+                    {% for extpo in external_pos %}
+                      <option value="{{ extpo.pk }}">{{ extpo.get_full_name|default:extpo.username }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-warning btn-sm">Assign External PO</button>
+              </form>
+            {% endif %}
           </div>
           <!-- Right Column: Team Details & Project info -->
           <div class="col-md-6">

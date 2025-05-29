@@ -1,19 +1,18 @@
 {% extends 'base.html' %}
+{% load user_extras %}
 {% block title %}Project Detail{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-10">
-        <!-- Project Header with Edit/Delete Options -->
+        <!-- Project Header with Edit/Delete/Add Options -->
         <div class="card shadow-sm mb-3">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h3 class="mb-0">{{ project.name }}</h3>
-                <div>
-                    {% if user.is_authenticated and user.role == 'team_leader' %}
-                        <a class="btn btn-light btn-sm" href="{% url 'project_update' project.pk %}">Edit</a>
+                <div class="d-flex gap-2">
+                    {% if user.is_authenticated and user == project.team_leader %}
+                    <a class="btn btn-light btn-sm" href="{% url 'project_update' project.pk %}">Edit</a>
+                    <a href="{% url 'add_team_to_project' project.id %}" class="btn btn-success btn-sm">Add</a>
                         <a class="btn btn-danger btn-sm" href="{% url 'project_delete' project.pk %}">Delete</a>
-                    {% else %}
-                        <button class="btn btn-light btn-sm" disabled>Edit</button>
-                        <button class="btn btn-danger btn-sm" disabled>Delete</button>
                     {% endif %}
                 </div>
             </div>
@@ -24,111 +23,161 @@
                     <div class="col-md-6">
                         <p><strong>Description:</strong></p>
                         <p>{{ project.description }}</p>
-                    </div>
-                    <!-- Right Column: Team & Members -->
-                    <div class="col-md-6">
-                        <p><strong>Team:</strong></p>
-                        {% if project.teams.all %}
-                            {% with team=project.teams.first %}
-                                <p>{{ team.name }}</p>
-                                <ul class="list-group">
-                                    {# Team Leader #}
-                                    {% for assignment in team.teamassignment_set.all %}
-                                        {% if assignment.role == "Team Leader" %}
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                {{ assignment.user.get_full_name }}
-                                                <span class="badge bg-primary">{{ assignment.role }}</span>
-                                            </li>
-                                        {% endif %}
-                                    {% endfor %}
-                                    {# Internal PO #}
-                                    {% for assignment in team.teamassignment_set.all %}
-                                        {% if assignment.role == "Internal PO" %}
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                {{ assignment.user.get_full_name }}
-                                                <span class="badge bg-primary">{{ assignment.role }}</span>
-                                            </li>
-                                        {% endif %}
-                                    {% endfor %}
-                                    {# External PO #}
-                                    {% for assignment in team.teamassignment_set.all %}
-                                        {% if assignment.role == "External PO" %}
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                {{ assignment.user.get_full_name }}
-                                                <span class="badge bg-primary">{{ assignment.role }}</span>
-                                            </li>
-                                        {% endif %}
-                                    {% endfor %}
-                                    {# Collaborators #}
-                                    {% for assignment in team.teamassignment_set.all %}
-                                        {% if assignment.role == "Collaborator" %}
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                {{ assignment.user.get_full_name }}
-                                                <span class="badge bg-secondary">{{ assignment.role }}</span>
-                                            </li>
-                                        {% endif %}
-                                    {% endfor %}
-                                    {% if team.teamassignment_set.count == 0 %}
-                                        <li class="list-group-item text-muted">No members assigned.</li>
+                        <strong>Preferred Competencies:</strong>
+                        <div>
+                            {% if project.preferred_competencies %}
+                                {% for comp in project.preferred_competencies.splitlines %}
+                                    {% if comp %}
+                                        <span class="badge bg-info text-dark me-1">{{ comp }}</span>
                                     {% endif %}
-                                </ul>
-                                {% if user.is_authenticated and user.role == "team_leader" and project.team_set.exists %}
-                                    <form method="post" action="{% url 'remove_team_from_project' project.pk %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger w-100">Remove Team from Project</button>
-                                    </form>
-                                {% endif %}
-                            {% endwith %}
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted small">None listed</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Right Column: Teams & Leaders -->
+                    <div class="col-md-6">
+                        <p><strong>Teams:</strong></p>
+                        {% if project.teams.all %}
+                            <ul class="list-group">
+                                {% for team in project.teams.all %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>
+                                            <a href="{% url 'team-detail' team.pk %}" class="fw-bold text-decoration-none">
+                                                {{ team.name }}
+                                            </a>
+                                        </span>
+                                        <span>
+                                            {% with leader=team.teamassignment_set.all|get_team_leader %}
+                                                {% if leader %}
+                                                    <span class="badge bg-primary">
+                                                        {{ leader.user.get_full_name|default:leader.user.username }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">No leader assigned</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         {% else %}
-                            <p class="text-muted">No team assigned.</p>
+                            <p class="text-muted">No teams assigned.</p>
                         {% endif %}
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Testers Section -->
+        <!-- Testers and Team Members Section -->
         <div class="card shadow-sm mb-3">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0">Testers</h5>
-            </div>
             <div class="card-body">
-                {% if project.testers.all %}
-                    <ul class="list-group mb-3">
-                        {% for tester in project.testers.all %}
-                            <li class="list-group-item">{{ tester.get_full_name|default:tester.username }}</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="text-muted">No testers assigned.</p>
-                {% endif %}
-
-                {% if user.is_authenticated and user == project.team_leader %}
-                    <form method="post" action="{% url 'edit_project_testers' project.pk %}">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="id_testers" class="form-label">Edit Testers</label>
-                            <select name="testers" id="id_testers" class="form-control" multiple>
-                                {% for collaborator in collaborators %}
-                                    <option value="{{ collaborator.pk }}"
-                                        {% if collaborator in project.testers.all %}selected{% endif %}>
-                                        {{ collaborator.get_full_name|default:collaborator.username }}
-                                    </option>
-                                {% endfor %}
-                            </select>
+                <div class="row align-items-stretch">
+                    <!-- Testers Section -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0">Testers</h5>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                {% if project.testers.all %}
+                                    <ul class="list-group mb-3 flex-grow-1">
+                                        {% for tester in project.testers.all %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                {{ tester.get_full_name|default:tester.username }}
+                                                {% if user.is_authenticated and user == project.team_leader %}
+                                                    <form method="post" action="{% url 'remove_project_tester' project.pk tester.pk %}" style="display:inline;">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-sm btn-danger fs-4 px-2 py-0" title="Remove Tester">&times;</button>
+                                                    </form>
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="text-muted flex-grow-1">No testers assigned.</p>
+                                {% endif %}
+                                {% if user.is_authenticated and user == project.team_leader %}
+                                    <form method="post" action="{% url 'add_project_tester' project.pk %}">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <label for="id_add_tester" class="form-label">Add Tester</label>
+                                            <select name="tester" id="id_add_tester" class="form-control">
+                                                <option value="">Select a collaborator</option>
+                                                {% for collaborator in collaborators %}
+                                                    {% if collaborator not in project.testers.all %}
+                                                        <option value="{{ collaborator.pk }}">{{ collaborator.get_full_name|default:collaborator.username }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-success w-100">Add Tester</button>
+                                    </form>
+                                {% endif %}
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-success w-100">Save Testers</button>
-                    </form>
-                {% endif %}
+                    </div>
+                    <!-- Team Members Section -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0">Team Members</h5>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                {% if project.teams.all %}
+                                    <div class="mb-3">
+                                        <label for="teamSelect" class="form-label">Select Team:</label>
+                                        <select id="teamSelect" class="form-select" onchange="showTeamMembers()">
+                                            {% for team in project.teams.all %}
+                                                <option value="team-{{ team.id }}">{{ team.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    {% for team in project.teams.all %}
+                                        <div class="team-members-list flex-grow-1" id="team-{{ team.id }}" style="{% if not forloop.first %}display:none;{% endif %}">
+                                            <p class="fw-bold">{{ team.name }}</p>
+                                            <ul class="list-group">
+                                                {% for assignment in team.teamassignment_set.all %}
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        {{ assignment.user.get_full_name|default:assignment.user.username }}
+                                                        <span class="badge 
+                                                            {% if assignment.role == 'Team Leader' %}bg-primary
+                                                            {% elif assignment.role == 'Internal PO' %}bg-info text-dark
+                                                            {% elif assignment.role == 'External PO' %}bg-warning text-dark
+                                                            {% else %}bg-secondary
+                                                            {% endif %}
+                                                        ">
+                                                            {{ assignment.role }}
+                                                        </span>
+                                                    </li>
+                                                {% empty %}
+                                                    <li class="list-group-item text-muted">No members assigned.</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endfor %}
+                                    {% if user.is_authenticated and user == project.team_leader %}
+                                        <form id="removeTeamForm" method="post" action="{% url 'remove_team_from_project' project.pk %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="team_id" id="removeTeamId" value="{% if project.teams.all %}{{ project.teams.all.0.id }}{% endif %}">
+                                            <button type="submit" class="btn btn-danger w-100 mt-3">Remove This Team</button>
+                                        </form>
+                                        <script>
+                                        document.getElementById('teamSelect').addEventListener('change', function() {
+                                            document.getElementById('removeTeamId').value = this.value.replace('team-', '');
+                                        });
+                                        </script>
+                                    {% endif %}
+                                {% else %}
+                                    <p class="text-muted flex-grow-1">No team assigned.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <!-- Add New Project Update Button -->
-        <div class="d-flex justify-content-end mb-3">
-            {% if user.is_authenticated and user == project.team_leader %}
-                <a href="{% url 'add_project_update' project.pk %}" class="btn btn-primary w-100">Add New Update</a>
-            {% else %}
-                <button class="btn btn-primary w-100" disabled>Add New Update</button>
-            {% endif %}
-        </div>
+        
         <!-- Latest Project Update Section -->
         <div class="card shadow-sm mb-3">
             <div class="card-header bg-secondary text-white">
@@ -148,23 +197,33 @@
                         <p class="text-muted">No updates available.</p>
                     {% endif %}
                 {% endwith %}
+                {% if user.is_authenticated and user == project.team_leader %}
+                    <div class="mt-3">
+                        <a href="{% url 'add_project_update' project.pk %}" class="btn btn-primary w-100">Add New Update</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
         <!-- Add or Create Team Button -->
-        {% if not project.teams.exists %}
-        <div class="d-flex justify-content-end mt-3">
-            <a href="{% url 'add_team_to_project' project.id %}" class="btn btn-success w-100">Add or Create Team</a>
-        </div>
-        {% endif %}
-        <!-- Remove Team from Project Button -->
-        {% if user.is_authenticated and user.role == "team_leader" %}
-            <div class="mt-3">
-                <form method="post" action="{% url 'remove_team_from_project' project.pk %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger w-100 mt-2">Remove Team from Project</button>
-                </form>
+        {% if not project.teams.exists and user.is_authenticated and user == project.team_leader %}
+            <div class="d-flex justify-content-end mt-3">
+                <a href="{% url 'add_team_to_project' project.id %}" class="btn btn-success w-100">Add or Create Team</a>
             </div>
         {% endif %}
     </div>
 </div>
+<script>
+function showTeamMembers() {
+    var select = document.getElementById('teamSelect');
+    var selectedId = select.value;
+    var lists = document.getElementsByClassName('team-members-list');
+    for (var i = 0; i < lists.length; i++) {
+        lists[i].style.display = 'none';
+    }
+    var selectedDiv = document.getElementById(selectedId);
+    if (selectedDiv) {
+        selectedDiv.style.display = 'block';
+    }
+}
+</script>
 {% endblock %}

@@ -27,11 +27,11 @@
                                         {{ field }}
                                     </div>
                                 {% else %}
+                                    {% if field.help_text %}
+                                        <div class="form-text">{{ field.help_text }}</div>
+                                    {% endif %}
                                     {{ field }}
-                                {% endif %}
-                                {% if field.help_text %}
-                                    <div class="form-text">{{ field.help_text }}</div>
-                                {% endif %}
+                                {% endif %}        
                                 {% for error in field.errors %}
                                     <div class="text-danger small">{{ error }}</div>
                                 {% endfor %}

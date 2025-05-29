@@ -3,17 +3,19 @@ from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.http import HttpResponse
+from django.utils import timezone
+from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+
 from .models import Project
 from .forms import ProjectForm, ProjectUpdateForm
 from teams.forms import ManualTeamForm
 from teams.models import Team, TeamAssignment
 from users.models import User
-from django.http import HttpResponse
+
 import random
 from datetime import datetime
-from django.utils import timezone
-from django.db.models import Q
-from django.contrib.auth.decorators import login_required
 
 # Funções utilitárias para seleção balanceada
 def get_collaborators_by_skill(collaborators, skill):
@@ -72,8 +74,15 @@ class ProjectDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         project = self.object
-        # When rendering the detail page
-        collaborators = User.objects.filter(role='collaborator')
+
+        # Exclude users already assigned to any team in this project
+        assigned_user_ids = set(
+            assignment.user_id
+            for team in project.teams.all()
+            for assignment in team.teamassignment_set.all()
+        )
+        collaborators = User.objects.filter(role='collaborator').exclude(id__in=assigned_user_ids)
+
         context.update({
             'project': project,
             'collaborators': collaborators,
@@ -103,12 +112,17 @@ class ProjectConfirmationView(LoginRequiredMixin, TeamLeaderRequiredMixin, Detai
     
 def manual_team_create(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
-    all_collaborators = User.objects.filter(role='collaborator')
     project_competencies = [c.strip().lower() for c in (project.preferred_competencies or '').splitlines() if c.strip()]
     team_leader = request.user
+    # Get all user IDs already assigned to any team in this project
+    assigned_user_ids = set(
+        assignment.user_id
+        for team in project.teams.all()
+        for assignment in team.teamassignment_set.all()
+    )
 
-    # Exclude the team leader from collaborators list
-    collaborators = all_collaborators.exclude(id=team_leader.id)
+    # Only include collaborators not already assigned
+    collaborators = User.objects.filter(role='collaborator').exclude(id__in=assigned_user_ids)
 
     # Helper: count how many project competencies the user has
     def competency_match_count(user):
@@ -152,8 +166,10 @@ def manual_team_create(request, project_id):
                 internal_po = User.objects.get(id=request.POST.get('internal_po'))
                 TeamAssignment.objects.create(team=team, user=internal_po, role='Internal PO')
                 # Create TeamAssignment for External PO
-                external_po = User.objects.get(id=request.POST.get('external_po'))
-                TeamAssignment.objects.create(team=team, user=external_po, role='External PO')
+                external_po_id = request.POST.get('external_po')
+                if external_po_id:
+                    external_po = User.objects.get(id=external_po_id)
+                    TeamAssignment.objects.create(team=team, user=external_po, role='External PO')
                 messages.success(request, f"Equipe '{name}' criada com sucesso!")
                 return redirect('project_detail', pk=project.pk)
     else:
@@ -170,7 +186,17 @@ def manual_team_create(request, project_id):
 
 def generate_team_view(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
-    collaborators = list(User.objects.filter(role='collaborator'))
+
+    assigned_user_ids = set(
+        assignment.user_id
+        for team in project.teams.all()
+        for assignment in team.teamassignment_set.all()
+    )
+    
+    collaborators = list(
+        User.objects.filter(role='collaborator').exclude(id__in=assigned_user_ids)
+    )
+    
     min_size, max_size = 4, 10
 
     # Helper functions for algorithms
@@ -252,11 +278,14 @@ def generate_team_view(request, project_id):
         # Assign roles: current user = Team Leader, then Internal PO, External PO, rest Collaborators
         team = Team.objects.create(name=team_name, project=project)
         TeamAssignment.objects.create(team=team, user=request.user, role="Team Leader")
+        # Do NOT include external_po users in this pool
+
+        # When assigning roles, skip External PO
         for idx, member in enumerate(generated_members):
             if idx == 0:
                 role = "Internal PO"
-            elif idx == 1:
-                role = "External PO"
+            # elif idx == 1:  # Remove this for External PO
+            #     role = "External PO"
             else:
                 role = "Collaborator"
             TeamAssignment.objects.create(team=team, user=member, role=role)
@@ -310,13 +339,12 @@ def add_team_to_project(request, project_id):
 @login_required
 def remove_team_from_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
-    if request.user.role != "team_leader":
-        messages.error(request, "Only the team leader can remove the team.")
-        return redirect('project_detail', pk=project_id)
     if request.method == "POST":
-        # Remove all teams from this project (or adjust as needed)
-        project.teams.clear()
-        messages.success(request, "Team removed from project. You can now assign or create a new team.")
+        team_id = request.POST.get("team_id")
+        if team_id:
+            team = get_object_or_404(Team, pk=team_id, project=project)
+            team.project = None
+            team.save()
     return redirect('project_detail', pk=project_id)
 
 @login_required
@@ -344,10 +372,6 @@ def project_updates_list(request, project_id):
         'updates': updates,
     })
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Project
-from .forms import ProjectForm
 
 @login_required
 def project_update(request, pk):
@@ -368,10 +392,41 @@ def edit_project_testers(request, pk):
     project = get_object_or_404(Project, pk=pk)
     if request.user != project.team_leader:
         return redirect('project_detail', pk=pk)
+
+    # Get all user IDs already assigned to any team in this project
+    assigned_user_ids = set(
+        assignment.user_id
+        for team in project.teams.all()
+        for assignment in team.teamassignment_set.all()
+    )
+
     if request.method == 'POST':
         tester_ids = request.POST.getlist('testers')
-        testers = User.objects.filter(pk__in=tester_ids, role='collaborator')
+        # Only allow collaborators not already assigned to the project
+        testers = User.objects.filter(
+            pk__in=tester_ids,
+            role='collaborator'
+        ).exclude(id__in=assigned_user_ids)
         project.testers.set(testers)
         project.save()
         return redirect('project_detail', pk=pk)
+    return redirect('project_detail', pk=pk)
+
+@login_required
+def add_project_tester(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    if request.user == project.team_leader and request.method == "POST":
+        tester_id = request.POST.get("tester")
+        if tester_id:
+            tester = get_object_or_404(User, pk=tester_id)
+            if tester not in project.testers.all():
+                project.testers.add(tester)
+    return redirect('project_detail', pk=pk)
+
+@login_required
+def remove_project_tester(request, pk, tester_pk):
+    project = get_object_or_404(Project, pk=pk)
+    if request.user == project.team_leader and request.method == "POST":
+        tester = get_object_or_404(User, pk=tester_pk)
+        project.testers.remove(tester)
     return redirect('project_detail', pk=pk)

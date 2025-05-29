@@ -5,6 +5,7 @@ class User(AbstractUser):
     ROLE_CHOICES = [
         ('team_leader', 'Team Leader'),
         ('collaborator', 'Collaborator'),
+        ('external_po', 'External PO'),  # <-- Add this line
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     age = models.PositiveIntegerField(null=True, blank=True)
@@ -15,7 +16,8 @@ class User(AbstractUser):
         blank=True,
         null=True,
         help_text="Comma separated list of preferred roles"
-    )  # Comma-separated or use ManyToMany if you want
+    )  
+    # Comma-separated or use ManyToMany if you want
     # Full name can be stored in first_name and last_name (from AbstractUser)
     best_competency = models.ForeignKey(
         'users.Competency',

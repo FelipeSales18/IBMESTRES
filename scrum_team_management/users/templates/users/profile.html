@@ -7,63 +7,95 @@
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h3 class="mb-0">{{ user_profile.first_name }} {{ user_profile.last_name }}</h3>
-                {% if user.is_authenticated and user == user_profile %}
+                {% if user.is_authenticated and user == user_profile and user_profile.role != 'external_po' %}
                     <a href="{% url 'edit-profile' %}" class="btn btn-light btn-sm">Edit Profile</a>
                 {% endif %}
             </div>
             <div class="card-body">
-                <table class="table table-borderless mb-4">
-                    <tr>
-                        <th>Email:</th>
-                        <td>{{ user_profile.email }}</td>
-                    </tr>
-                    <tr>
-                        <th>Role:</th>
-                        <td>{{ user_profile.get_role_display }}</td>
-                    </tr>
-                    <tr>
-                        <th>Age:</th>
-                        <td>{{ user_profile.age }}</td>
-                    </tr>
-                    <tr>
-                        <th>Best Competency:</th>
-                        <td>
-                            {% if user_profile.best_competency %}
-                                <span class="badge bg-success">{{ user_profile.best_competency }}</span>
-                            {% else %}
-                                <span class="text-muted">None listed</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Other Competencies:</th>
-                        <td>
-                            {% with others=user_profile.competencies.all %}
-                                {% if others %}
-                                    {% for comp in others %}
-                                        {% if user_profile.best_competency != comp %}
-                                            <span class="badge bg-secondary">{{ comp.skill_name }}</span>
-                                        {% endif %}
+                {% if user_profile.role == 'team_leader' %}
+                    <table class="table table-borderless mb-4">
+                        <tr>
+                            <th>Name:</th>
+                            <td>{{ user_profile.first_name }} {{ user_profile.last_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ user_profile.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Age:</th>
+                            <td>{{ user_profile.age }}</td>
+                        </tr>
+                    </table>
+                {% elif user_profile.role == 'external_po' %}
+                    <table class="table table-borderless mb-4">
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ user_profile.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Role:</th>
+                            <td>{{ user_profile.get_role_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Age:</th>
+                            <td>{{ user_profile.age }}</td>
+                        </tr>
+                    </table>
+                {% else %}
+                    <table class="table table-borderless mb-4">
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ user_profile.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Role:</th>
+                            <td>{{ user_profile.get_role_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Age:</th>
+                            <td>{{ user_profile.age }}</td>
+                        </tr>
+                        <tr>
+                            <th>Best Competency:</th>
+                            <td>
+                                {% if user_profile.best_competency %}
+                                    <span class="badge bg-success">{{ user_profile.best_competency }}</span>
+                                {% else %}
+                                    <span class="text-muted">None listed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Other Competencies:</th>
+                            <td>
+                                {% with others=user_profile.competencies.all %}
+                                    {% if others %}
+                                        {% for comp in others %}
+                                            {% if user_profile.best_competency != comp %}
+                                                <span class="badge bg-secondary">{{ comp.skill_name }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">None listed</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Preferred Roles:</th>
+                            <td>
+                                {% if user_profile.roles_preferred %}
+                                    {% for role in user_profile.roles_preferred|split:"," %}
+                                        <span class="badge bg-info text-dark">{{ role|trim }}</span>    
                                     {% endfor %}
                                 {% else %}
                                     <span class="text-muted">None listed</span>
                                 {% endif %}
-                            {% endwith %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Preferred Roles:</th>
-                        <td>
-                            {% if user_profile.roles_preferred %}
-                                {% for role in user_profile.roles_preferred|split:"," %}
-                                    <span class="badge bg-info text-dark">{{ role|trim }}</span>    
-                                {% endfor %}
-                            {% else %}
-                                <span class="text-muted">None listed</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
+                            </td>
+                        </tr>
+                    </table>
+                {% endif %}
             </div>
         </div>
     </div>

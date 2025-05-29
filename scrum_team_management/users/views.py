@@ -4,7 +4,7 @@ from django.views.generic import CreateView, DetailView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from .forms import CollaboratorRegisterForm, TeamLeaderRegisterForm, UserEditForm
+from .forms import CollaboratorRegisterForm, TeamLeaderRegisterForm, UserEditForm, ExternalPORegisterForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.views import View
@@ -108,3 +108,15 @@ def edit_profile(request):
     else:
         form = UserEditForm(instance=request.user)
     return render(request, 'users/profile_edit.html', {'form': form})
+
+class ExternalPORegisterView(View):
+    def get(self, request):
+        form = ExternalPORegisterForm()
+        return render(request, 'users/register_external_po.html', {'form': form})
+
+    def post(self, request):
+        form = ExternalPORegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+        return render(request, 'users/register_external_po.html', {'form': form})

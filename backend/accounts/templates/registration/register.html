@@ -8,37 +8,37 @@
     <h4>Criar uma conta</h4>
     <form method="post" id="register-form">
         {% csrf_token %}
-        <label for="id_role">Tipo de Usuário:</label>
+        <label for="id_role">Type of User:</label>
         <select name="role" id="id_role" class="form-control">
-            <option value="">Selecione...</option>
+            <option value="">Select...</option>
             <option value="leader">Líder</option>
             <option value="collaborator">Colaborador</option>
         </select>
 
         <div id="common-fields">
-            <label for="id_full_name">Nome Completo:</label>
+            <label for="id_full_name">Full Name:</label>
             <input type="text" name="full_name" id="id_full_name" class="form-control" required>
             <label for="id_username">Username:</label>
             <input type="text" name="username" id="id_username" class="form-control" required>
             <label for="id_email">Email:</label>
             <input type="email" name="email" id="id_email" class="form-control" required>
-            <label for="id_password1">Senha:</label>
+            <label for="id_password1">Password:</label>
             <input type="password" name="password1" id="id_password1" class="form-control" required>
-            <label for="id_password2">Confirme a Senha:</label>
+            <label for="id_password2">Confirm Password:</label>
             <input type="password" name="password2" id="id_password2" class="form-control" required>
         </div>
 
         <div id="leader-fields" style="display: none;">
-            <h5>Informações do Líder</h5>
-            <label for="id_empresa">Empresa:</label>
+            <h5>Leader Information</h5>
+            <label for="id_empresa">Company:</label>
             <input type="text" name="empresa" id="id_empresa" class="form-control">
-            <label for="id_anos_como_lider">Anos como Líder:</label>
+            <label for="id_anos_como_lider">Years as Leader:</label>
             <input type="number" name="anos_como_lider" id="id_anos_como_lider" class="form-control">
         </div>
 
         <div id="collaborator-fields" style="display: none;">
-            <h5>Informações do Colaborador</h5>
-            <label for="id_idade">Idade:</label>
+            <h5>Collaborator Information</h5>
+            <label for="id_idade">Age:</label>
             <input type="number" name="idade" id="id_idade" class="form-control">
             <label for="id_hard_skils">Hard Skills:</label>
             <input type="text" name="hard_skils" id="id_hard_skils" class="form-control">

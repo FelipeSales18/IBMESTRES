@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Criar Equipe Manualmente{% endblock %}
+{% block title %}Create Team Manually{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
@@ -13,7 +13,7 @@
         {% endif %}
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white text-center">
-                <h3 class="mb-0">Criar Equipe Manualmente</h3>
+                <h3 class="mb-0">Create Team Manually</h3>
             </div>
             <div class="card-body">
                 <form method="post" novalidate>
@@ -31,15 +31,15 @@
                         {% endfor %}
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Membros obrigatórios</label>
+                        <label class="form-label">Required Members</label>
                         <ul class="list-group mb-2">
                             <li class="list-group-item">
-                                <strong>Líder da Equipe:</strong> {{ team_leader.get_full_name|default:team_leader.username }} (você)
+                                <strong>Team Leader:</strong> {{ team_leader.get_full_name|default:team_leader.username }} (you)
                             </li>
                             <li class="list-group-item">
-                                <strong>PO Interno:</strong>
+                                <strong>Internal PO:</strong>
                                 <select name="internal_po" class="form-select" required>
-                                    <option value="">Selecione...</option>
+                                    <option value="">Select...</option>
                                     {% for colaborador in colaboradores %}
                                         {% if colaborador.is_internal_po %}
                                             <option value="{{ colaborador.id }}" selected>{{ colaborador.get_full_name|default:colaborador.username }}</option>
@@ -50,9 +50,9 @@
                                 </select>
                             </li>
                             <li class="list-group-item">
-                                <strong>PO Externo:</strong>
+                                <strong>External PO:</strong>
                                 <select name="external_po" class="form-select" required>
-                                    <option value="">Selecione...</option>
+                                    <option value="">Select...</option>
                                     {% for colaborador in colaboradores %}
                                         {% if colaborador.is_external_po %}
                                             <option value="{{ colaborador.id }}" selected>{{ colaborador.get_full_name|default:colaborador.username }}</option>
@@ -65,13 +65,13 @@
                         </ul>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Colaboradores disponíveis</label>
+                        <label class="form-label">Available Collaborators</label>
                         <table class="table table-bordered table-hover">
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Nome</th>
-                                    <th>Funcionalidades</th>
+                                    <th>Name</th>
+                                    <th>Skills</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -98,10 +98,10 @@
                             <div class="text-danger small">{{ error }}</div>
                         {% endfor %}
                         <div class="form-text">
-                            <span id="selected-count">Selecionados: 0 / {{ form.num_members.value|default:3 }}</span>
+                            <span id="selected-count">Selected: 0 / {{ form.num_members.value|default:3 }}</span>
                         </div>
                     </div>
-                    <button class="btn btn-success w-100" type="submit">Confirmar</button>
+                    <button class="btn btn-success w-100" type="submit">Confirm</button>
                 </form>
             </div>
         </div>
@@ -114,10 +114,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectedCount = document.getElementById('selected-count');
     function updateCount() {
         const max = parseInt(numMembersSelect.value);
-        const required = 3; // Team Leader, Internal PO, External PO
+        const required = 2; // Team Leader, Internal PO
         let checked = 0;
         checkboxes.forEach(cb => { if (cb.checked) checked++; });
-        selectedCount.textContent = `Selecionados: ${checked + required} / ${max}`;
+        selectedCount.textContent = `Selected: ${checked + required} / ${max}`;
         if ((checked + required) >= max) {
             checkboxes.forEach(cb => { if (!cb.checked) cb.disabled = true; });
         } else {

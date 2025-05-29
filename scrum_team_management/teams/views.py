@@ -1,9 +1,12 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Team, User
+from django.views.decorators.http import require_POST
+
+from .models import Team, TeamAssignment
+from users.models import User
 from .forms import TeamForm
 
 class TeamLeaderRequiredMixin(UserPassesTestMixin):
@@ -30,6 +33,7 @@ class TeamDetailView(LoginRequiredMixin, DetailView):
         context['testers'] = assignments.filter(role="Tester")
         # Adicione todos os membros
         context['all_members'] = [a.user for a in assignments]
+        context['external_pos'] = User.objects.filter(role='external_po')
         return context
 
 class TeamCreateView(LoginRequiredMixin, TeamLeaderRequiredMixin, CreateView):
@@ -54,3 +58,27 @@ class TeamDeleteView(LoginRequiredMixin, TeamLeaderRequiredMixin, DeleteView):
 def collaborators_list_view(request):
     collaborators = User.objects.filter(role='collaborator')
     return render(request, 'users/collaborators_list.html', {'collaborators': collaborators})
+
+def team_detail(request, pk):
+    team = get_object_or_404(Team, pk=pk)
+    external_pos = User.objects.filter(role='external_po')
+    context = {
+        'team': team,
+        'external_pos': external_pos
+    }
+    return render(request, 'teams/team_detail.html', context)
+
+@require_POST
+@login_required
+def assign_external_po(request, pk):
+    team = get_object_or_404(Team, pk=pk)
+    if request.user.role != 'team_leader':
+        return redirect('team-detail', pk=pk)
+    external_po_id = request.POST.get('external_po_id')
+    if external_po_id:
+        user = get_object_or_404(User, pk=external_po_id, role='external_po')
+        # Remove any existing External PO
+        team.teamassignment_set.filter(role="External PO").delete()
+        # Assign new one
+        TeamAssignment.objects.create(team=team, user=user, role="External PO")
+    return redirect('team-detail', pk=pk)

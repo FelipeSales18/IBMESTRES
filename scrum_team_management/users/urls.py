@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     RegisterTypeSelectView, CollaboratorRegisterView, TeamLeaderRegisterView,
-    UserLoginView, UserLogoutView, UserProfileView, team_leader_dashboard, collaborator_dashboard, edit_profile
+    UserLoginView, UserLogoutView, UserProfileView, team_leader_dashboard, collaborator_dashboard, edit_profile,
+    ExternalPORegisterView,
 )
 
 urlpatterns = [
@@ -14,4 +15,5 @@ urlpatterns = [
     path('dashboard/', collaborator_dashboard, name='collaborator_dashboard'),
     path('dashboard/leader/', team_leader_dashboard, name='team_leader_dashboard'),
     path('profile/edit/', edit_profile, name='edit-profile'),
+    path('register/external-po/', ExternalPORegisterView.as_view(), name='register_external_po'),
 ]

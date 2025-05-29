@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Gerar Equipe Automática{% endblock %}
+{% block title %}Generate Team Automatically{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
@@ -13,17 +13,17 @@
         {% endif %}
         <div class="card shadow-sm">
             <div class="card-header bg-info text-white text-center">
-                <h3 class="mb-0">Gerar Equipe Automática</h3>
+                <h3 class="mb-0">Generate Team Automatically</h3>
             </div>
             <div class="card-body">
                 <!-- Generate Team Form (GET) -->
                 <form method="get" class="mb-4">
                     <div class="mb-3">
-                        <label class="form-label"><strong>Nome do Time:</strong></label>
+                        <label class="form-label"><strong>Team Name:</strong></label>
                         <input type="text" class="form-control" name="team_name" value="{{ request.GET.team_name|default:default_team_name }}" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><strong>Número de Membros:</strong></label>
+                        <label class="form-label"><strong>Number of Members:</strong></label>
                         <select class="form-select" name="num_members">
                             <option value="4" {% if request.GET.num_members == "4" %}selected{% endif %}>4</option>
                             <option value="5" {% if request.GET.num_members == "5" %}selected{% endif %}>5</option>
@@ -35,27 +35,27 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><strong>Algoritmo:</strong></label>
+                        <label class="form-label"><strong>Algorithm:</strong></label>
                         <select class="form-select" name="algorithm">
                             <option value="balanced" {% if request.GET.algorithm == "balanced" %}selected{% endif %}>Balanced</option>
                             <option value="greedy" {% if request.GET.algorithm == "greedy" %}selected{% endif %}>Greedy</option>
                             <option value="random" {% if request.GET.algorithm == "random" %}selected{% endif %}>Random</option>
                         </select>
                     </div>
-                    <button class="btn btn-success w-100" type="submit">Gerar Equipe</button>
+                    <button class="btn btn-success w-100" type="submit">Generate Team</button>
                 </form>
 
                 {% if suggested_team %}
                 <!-- Show generated team and accept button only if a team was generated -->
                 <div class="mb-3">
-                    <label class="form-label"><strong>Colaboradores Selecionados ({{ suggested_team|length }}):</strong></label>
+                    <label class="form-label"><strong>Selected Collaborators ({{ suggested_team|length }}):</strong></label>
                     <table class="table table-bordered table-hover">
                         <thead>
                             <tr>
-                                <th>Nome</th>
-                                <th>Função na Equipe</th>
-                                <th>Melhor Competência</th>
-                                <th>Anos de Experiência</th>
+                                <th>Name</th>
+                                <th>Team Role</th>
+                                <th>Best Competency</th>
+                                <th>Years of Experience</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -90,7 +90,7 @@
                     <input type="hidden" name="team_name" value="{{ request.GET.team_name|default:default_team_name }}">
                     <input type="hidden" name="num_members" value="{{ request.GET.num_members|default:'4' }}">
                     <input type="hidden" name="algorithm" value="{{ request.GET.algorithm|default:'balanced' }}">
-                    <button class="btn btn-primary w-100" type="submit">Aceitar Equipe</button>
+                    <button class="btn btn-primary w-100" type="submit">Accept Team</button>
                 </form>
                 {% endif %}
             </div>

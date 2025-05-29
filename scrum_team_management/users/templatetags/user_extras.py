@@ -11,3 +11,7 @@ def split(value, key):
 def trim(value):
     """Trims whitespace from a string."""
     return value.strip()
+
+@register.filter
+def get_team_leader(assignments):
+    return assignments.filter(role="Team Leader").first()

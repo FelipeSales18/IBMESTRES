@@ -77,7 +77,7 @@ input[readonly], textarea[readonly] {
         <div class="perfil-info"><span class="perfil-label">Nome:</span>
             <input type="text" value="{{ funcionario.nome }}" readonly class="form-control-plaintext">
         </div>
-        <div class="perfil-info"><span class="perfil-label">Usuário:</span>
+        <div class="perfil-info"><span class="perfil-label">User:</span>
             <input type="text" value="{{ funcionario.user.username }}" readonly class="form-control-plaintext">
         </div>
         {% if not request.user.is_staff %}
