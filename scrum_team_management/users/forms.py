@@ -5,35 +5,43 @@ from .models import Competency, User
 User = get_user_model()
 
 ROLE_CHOICES = [
-    ('internal_po', 'Internal PO'),
-    ('external_po', 'External PO'),
-    ('developer', 'Developer'),
-    ('tester', 'Tester'),
+    ('internal_po', 'PO Interno'),
+    ('external_po', 'PO Externo'),
+    ('developer', 'Desenvolvedor'),
+    ('tester', 'Testador'),
 ]
 
 class CollaboratorRegisterForm(forms.ModelForm):
-    password1 = forms.CharField(widget=forms.PasswordInput, label="Password")
-    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+    password1 = forms.CharField(widget=forms.PasswordInput, label="Senha")
+    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirmar Senha")
     roles_preferred = forms.MultipleChoiceField(
         choices=ROLE_CHOICES,
         widget=forms.CheckboxSelectMultiple,
-        label="Preferred Roles"
+        label="Papéis Preferidos"
     )
     competencies = forms.CharField(
         widget=forms.Textarea,
-        help_text=("Enter your competencies one per line. "
-                   "The first competency will be set as your best competency."),
-        required=True
+        help_text=("Digite suas competências, uma por linha. "
+                   "A primeira competência será definida como sua melhor competência."),
+        required=True,
+        label="Competências"
     )
 
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'age', 'years_of_experience']
+        labels = {
+            'first_name': 'Nome',
+            'last_name': 'Sobrenome',
+            'email': 'E-mail',
+            'age': 'Idade',
+            'years_of_experience': 'Anos de Experiência',
+        }
 
     def clean_competencies(self):
         competencies_text = self.cleaned_data.get('competencies', '').strip()
         if not competencies_text:
-            raise forms.ValidationError("Please enter at least one competency.")
+            raise forms.ValidationError("Por favor, insira pelo menos uma competência.")
         
         # Process competencies: split by newline, strip and lowercase
         comp_list = [c.strip() for c in competencies_text.split('\n') if c.strip()]
@@ -49,7 +57,7 @@ class CollaboratorRegisterForm(forms.ModelForm):
         
         if duplicates:
             raise forms.ValidationError(
-                "Duplicate competencies found: " + ", ".join(duplicates)
+                "Competências duplicadas encontradas: " + ", ".join(duplicates)
             )
         # Optionally, you could standardize the competencies list here.
         return comp_list  # Return list for further processing
@@ -58,7 +66,7 @@ class CollaboratorRegisterForm(forms.ModelForm):
         cleaned_data = super().clean()
         # Check if passwords match.
         if cleaned_data.get("password1") != cleaned_data.get("password2"):
-            self.add_error("password2", "Passwords do not match.")
+            self.add_error("password2", "As senhas não coincidem.")
         return cleaned_data
 
     def save(self, commit=True):
@@ -87,17 +95,23 @@ class CollaboratorRegisterForm(forms.ModelForm):
         return user
 
 class TeamLeaderRegisterForm(forms.ModelForm):
-    password1 = forms.CharField(widget=forms.PasswordInput, label="Password")
-    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+    password1 = forms.CharField(widget=forms.PasswordInput, label="Senha")
+    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirmar Senha")
     
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'age']
+        labels = {
+            'first_name': 'Nome',
+            'last_name': 'Sobrenome',
+            'email': 'E-mail',
+            'age': 'Idade',
+        }
 
     def clean(self):
         cleaned_data = super().clean()
         if cleaned_data.get('password1') != cleaned_data.get('password2'):
-            self.add_error('password2', "Passwords do not match.")
+            self.add_error('password2', "As senhas não coincidem.")
         return cleaned_data
 
     def save(self, commit=True):
@@ -110,17 +124,23 @@ class TeamLeaderRegisterForm(forms.ModelForm):
         return user
 
 class ExternalPORegisterForm(forms.ModelForm):
-    password1 = forms.CharField(widget=forms.PasswordInput, label="Password")
-    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+    password1 = forms.CharField(widget=forms.PasswordInput, label="Senha")
+    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirmar Senha")
 
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'age']
+        labels = {
+            'first_name': 'Nome',
+            'last_name': 'Sobrenome',
+            'email': 'E-mail',
+            'age': 'Idade',
+        }
 
     def clean(self):
         cleaned_data = super().clean()
         if cleaned_data.get('password1') != cleaned_data.get('password2'):
-            self.add_error('password2', "Passwords do not match.")
+            self.add_error('password2', "As senhas não coincidem.")
         return cleaned_data
 
     def save(self, commit=True):
@@ -137,12 +157,13 @@ class UserEditForm(forms.ModelForm):
         choices=ROLE_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         required=False,
-        label="Preferred Roles"
+        label="Papéis Preferidos"
     )
     competencies = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={'rows': 3}),
-        help_text="Enter one competency per line."
+        help_text="Digite uma competência por linha.",
+        label="Competências"
     )
 
     class Meta:
@@ -151,6 +172,14 @@ class UserEditForm(forms.ModelForm):
             'first_name', 'last_name', 'email', 'age',
             'years_of_experience', 'best_competency', 'roles_preferred'
         ]
+        labels = {
+            'first_name': 'Nome',
+            'last_name': 'Sobrenome',
+            'email': 'E-mail',
+            'age': 'Idade',
+            'years_of_experience': 'Anos de Experiência',
+            'best_competency': 'Melhor Competência',
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

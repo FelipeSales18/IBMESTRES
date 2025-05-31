@@ -1,5 +1,20 @@
 {% extends 'base.html' %}
-{% block title %}Create Team Manually{% endblock %}
+{% load i18n %}
+{% block title %}Criar Equipe Manualmente{% endblock %}
+{% block navbar %}
+<!-- ...existing code for navbar... -->
+<li class="nav-item dropdown ms-auto">
+    <form action="{% url 'set_language' %}" method="post" id="language-selector" class="d-inline">
+        {% csrf_token %}
+        <select name="language" class="form-select form-select-sm" onchange="this.form.submit()" style="width:auto;display:inline;">
+            <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
+            <option value="pt-br" {% if LANGUAGE_CODE == 'pt-br' %}selected{% endif %}>Português</option>
+        </select>
+        <input type="hidden" name="next" value="{{ request.path }}">
+    </form>
+</li>
+<!-- ...existing code for navbar... -->
+{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
@@ -7,13 +22,13 @@
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                 </div>
             {% endfor %}
         {% endif %}
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white text-center">
-                <h3 class="mb-0">Create Team Manually</h3>
+                <h3 class="mb-0">Criar Equipe Manualmente</h3>
             </div>
             <div class="card-body">
                 <form method="post" novalidate>
@@ -31,15 +46,15 @@
                         {% endfor %}
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Required Members</label>
+                        <label class="form-label">Membros Obrigatórios</label>
                         <ul class="list-group mb-2">
                             <li class="list-group-item">
-                                <strong>Team Leader:</strong> {{ team_leader.get_full_name|default:team_leader.username }} (you)
+                                <strong>Líder da Equipe:</strong> {{ team_leader.get_full_name|default:team_leader.username }} (você)
                             </li>
                             <li class="list-group-item">
-                                <strong>Internal PO:</strong>
+                                <strong>PO Interno:</strong>
                                 <select name="internal_po" class="form-select" required>
-                                    <option value="">Select...</option>
+                                    <option value="">Selecione...</option>
                                     {% for colaborador in colaboradores %}
                                         {% if colaborador.is_internal_po %}
                                             <option value="{{ colaborador.id }}" selected>{{ colaborador.get_full_name|default:colaborador.username }}</option>
@@ -50,9 +65,9 @@
                                 </select>
                             </li>
                             <li class="list-group-item">
-                                <strong>External PO:</strong>
+                                <strong>PO Externo:</strong>
                                 <select name="external_po" class="form-select" required>
-                                    <option value="">Select...</option>
+                                    <option value="">Selecione...</option>
                                     {% for colaborador in colaboradores %}
                                         {% if colaborador.is_external_po %}
                                             <option value="{{ colaborador.id }}" selected>{{ colaborador.get_full_name|default:colaborador.username }}</option>
@@ -65,13 +80,13 @@
                         </ul>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Available Collaborators</label>
+                        <label class="form-label">Colaboradores Disponíveis</label>
                         <table class="table table-bordered table-hover">
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Name</th>
-                                    <th>Skills</th>
+                                    <th>Nome</th>
+                                    <th>Competências</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -98,10 +113,10 @@
                             <div class="text-danger small">{{ error }}</div>
                         {% endfor %}
                         <div class="form-text">
-                            <span id="selected-count">Selected: 0 / {{ form.num_members.value|default:3 }}</span>
+                            <span id="selected-count">Selecionados: 0 / {{ form.num_members.value|default:3 }}</span>
                         </div>
                     </div>
-                    <button class="btn btn-success w-100" type="submit">Confirm</button>
+                    <button class="btn btn-success w-100" type="submit">Confirmar</button>
                 </form>
             </div>
         </div>
@@ -114,10 +129,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectedCount = document.getElementById('selected-count');
     function updateCount() {
         const max = parseInt(numMembersSelect.value);
-        const required = 2; // Team Leader, Internal PO
+        const required = 2; // Líder da Equipe, PO Interno
         let checked = 0;
         checkboxes.forEach(cb => { if (cb.checked) checked++; });
-        selectedCount.textContent = `Selected: ${checked + required} / ${max}`;
+        selectedCount.textContent = `Selecionados: ${checked + required} / ${max}`;
         if ((checked + required) >= max) {
             checkboxes.forEach(cb => { if (!cb.checked) cb.disabled = true; });
         } else {

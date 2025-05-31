@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load teams_extras %}
-{% block title %}Team Detail{% endblock %}
+{% block title %}Detalhes da Equipe{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-md-8">
@@ -9,21 +9,20 @@
         <h3 class="mb-0">{{ team.name }}</h3>
         <div>
           {% if user.is_authenticated and user.role == 'team_leader' %}
-            <a class="btn btn-secondary" href="{% url 'team-update' team.pk %}">Edit</a>
-            <a class="btn btn-danger" href="{% url 'team-delete' team.pk %}">Delete</a>
+            <a class="btn btn-secondary" href="{% url 'team-update' team.pk %}">Editar</a>
+            <a class="btn btn-danger" href="{% url 'team-delete' team.pk %}">Excluir</a>
           {% else %}
-            <button class="btn btn-secondary" disabled>Edit</button>
-            <button class="btn btn-danger" disabled>Delete</button>
+            <button class="btn btn-secondary" disabled>Editar</button>
+            <button class="btn btn-danger" disabled>Excluir</button>
           {% endif %}
         </div>
       </div>
       <div class="card-body">
         <div class="row">
-          <!-- Left Column: Team Members grouped by role -->
+          <!-- Coluna Esquerda: Membros da Equipe agrupados por papel -->
           <div class="col-md-6">
-            <h5>Team Members</h5>
-            {# Team Leader #}
-            <h6>Team Leader</h6>
+            <h5>Membros da Equipe</h5>
+            <h6>Líder da Equipe</h6>
             <ul class="list-group mb-2">
               {% for assignment in team.teamassignment_set.all %}
                 {% if assignment.role == "Team Leader" %}
@@ -34,7 +33,6 @@
                 {% endif %}
               {% endfor %}
             </ul>
-            {# Product Owners #}
             <h6>Product Owners</h6>
             <ul class="list-group mb-2">
               {% for assignment in team.teamassignment_set.all %}
@@ -46,8 +44,7 @@
                 {% endif %}
               {% endfor %}
             </ul>
-            {# Collaborators (all others) #}
-            <h6>Collaborators</h6>
+            <h6>Colaboradores</h6>
             <ul class="list-group mb-2">
               {% for assignment in team.teamassignment_set.all %}
                 {% if assignment.role != "Team Leader" and assignment.role != "Internal PO" and assignment.role != "External PO" %}
@@ -58,11 +55,11 @@
                 {% endif %}
               {% endfor %}
               {% if team.teamassignment_set.count == 0 %}
-                <li class="list-group-item text-muted">No members assigned.</li>
+                <li class="list-group-item text-muted">Nenhum membro atribuído.</li>
               {% endif %}
             </ul>
-            <!-- External PO Section -->
-            <h6>External PO</h6>
+            <!-- Seção PO Externo -->
+            <h6>PO Externo</h6>
             <ul class="list-group mb-2">
               {% if team.teamassignment_set|has_external_po %}
                 {% with extpo=team.teamassignment_set|get_external_po %}
@@ -72,7 +69,7 @@
                   </li>
                 {% endwith %}
               {% else %}
-                <li class="list-group-item text-muted">No External PO assigned.</li>
+                <li class="list-group-item text-muted">Nenhum PO Externo atribuído.</li>
               {% endif %}
             </ul>
             {% if user.is_authenticated and user.role == 'team_leader' %}
@@ -80,28 +77,28 @@
                 {% csrf_token %}
                 <div class="mb-2">
                   <select name="external_po_id" class="form-select" required>
-                    <option value="">Select External PO</option>
+                    <option value="">Selecionar PO Externo</option>
                     {% for extpo in external_pos %}
                       <option value="{{ extpo.pk }}">{{ extpo.get_full_name|default:extpo.username }}</option>
                     {% endfor %}
                   </select>
                 </div>
-                <button type="submit" class="btn btn-warning btn-sm">Assign External PO</button>
+                <button type="submit" class="btn btn-warning btn-sm">Atribuir PO Externo</button>
               </form>
             {% endif %}
           </div>
-          <!-- Right Column: Team Details & Project info -->
+          <!-- Coluna Direita: Detalhes da Equipe & Projeto -->
           <div class="col-md-6">
-            <h5>Team Details</h5>
-            <p><strong>Description:</strong> {{ team.description }}</p>
+            <h5>Detalhes da Equipe</h5>
+            <p><strong>Descrição:</strong> {{ team.description }}</p>
             {% if team.project %}
               <p>
-                <strong>Project:</strong>
+                <strong>Projeto:</strong>
                 <a href="{% url 'project_detail' team.project.pk %}">{{ team.project.name }}</a>
               </p>
-              <p><strong>Project Created:</strong> {{ team.project.created_at }}</p>
+              <p><strong>Projeto Criado:</strong> {{ team.project.created_at }}</p>
             {% else %}
-              <p class="text-muted">No project assigned.</p>
+              <p class="text-muted">Nenhum projeto atribuído.</p>
             {% endif %}
           </div>
         </div>

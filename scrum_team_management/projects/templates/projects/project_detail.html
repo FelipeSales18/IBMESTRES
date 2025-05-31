@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load user_extras %}
-{% block title %}Project Detail{% endblock %}
+{% block title %}Detalhes do Projeto{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-10">
@@ -10,9 +10,9 @@
                 <h3 class="mb-0">{{ project.name }}</h3>
                 <div class="d-flex gap-2">
                     {% if user.is_authenticated and user == project.team_leader %}
-                    <a class="btn btn-light btn-sm" href="{% url 'project_update' project.pk %}">Edit</a>
-                    <a href="{% url 'add_team_to_project' project.id %}" class="btn btn-success btn-sm">Add</a>
-                        <a class="btn btn-danger btn-sm" href="{% url 'project_delete' project.pk %}">Delete</a>
+                    <a class="btn btn-light btn-sm" href="{% url 'project_update' project.pk %}">Editar</a>
+                    <a href="{% url 'add_team_to_project' project.id %}" class="btn btn-success btn-sm">Adicionar</a>
+                        <a class="btn btn-danger btn-sm" href="{% url 'project_delete' project.pk %}">Excluir</a>
                     {% endif %}
                 </div>
             </div>
@@ -21,9 +21,9 @@
                 <div class="row">
                     <!-- Left Column: Project Description -->
                     <div class="col-md-6">
-                        <p><strong>Description:</strong></p>
+                        <p><strong>Descrição:</strong></p>
                         <p>{{ project.description }}</p>
-                        <strong>Preferred Competencies:</strong>
+                        <strong>Competências Preferidas:</strong>
                         <div>
                             {% if project.preferred_competencies %}
                                 {% for comp in project.preferred_competencies.splitlines %}
@@ -32,13 +32,13 @@
                                     {% endif %}
                                 {% endfor %}
                             {% else %}
-                                <span class="text-muted small">None listed</span>
+                                <span class="text-muted small">Nenhuma listada</span>
                             {% endif %}
                         </div>
                     </div>
                     <!-- Right Column: Teams & Leaders -->
                     <div class="col-md-6">
-                        <p><strong>Teams:</strong></p>
+                        <p><strong>Equipes:</strong></p>
                         {% if project.teams.all %}
                             <ul class="list-group">
                                 {% for team in project.teams.all %}
@@ -55,7 +55,7 @@
                                                         {{ leader.user.get_full_name|default:leader.user.username }}
                                                     </span>
                                                 {% else %}
-                                                    <span class="badge bg-secondary">No leader assigned</span>
+                                                    <span class="badge bg-secondary">Nenhum líder atribuído</span>
                                                 {% endif %}
                                             {% endwith %}
                                         </span>
@@ -63,7 +63,7 @@
                                 {% endfor %}
                             </ul>
                         {% else %}
-                            <p class="text-muted">No teams assigned.</p>
+                            <p class="text-muted">Nenhuma equipe atribuída.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -77,7 +77,7 @@
                     <div class="col-md-6">
                         <div class="card h-100">
                             <div class="card-header bg-secondary text-white">
-                                <h5 class="mb-0">Testers</h5>
+                                <h5 class="mb-0">Testadores</h5>
                             </div>
                             <div class="card-body d-flex flex-column">
                                 {% if project.testers.all %}
@@ -88,22 +88,22 @@
                                                 {% if user.is_authenticated and user == project.team_leader %}
                                                     <form method="post" action="{% url 'remove_project_tester' project.pk tester.pk %}" style="display:inline;">
                                                         {% csrf_token %}
-                                                        <button type="submit" class="btn btn-sm btn-danger fs-4 px-2 py-0" title="Remove Tester">&times;</button>
+                                                        <button type="submit" class="btn btn-sm btn-danger fs-4 px-2 py-0" title="Remover Testador">&times;</button>
                                                     </form>
                                                 {% endif %}
                                             </li>
                                         {% endfor %}
                                     </ul>
                                 {% else %}
-                                    <p class="text-muted flex-grow-1">No testers assigned.</p>
+                                    <p class="text-muted flex-grow-1">Nenhum testador atribuído.</p>
                                 {% endif %}
                                 {% if user.is_authenticated and user == project.team_leader %}
                                     <form method="post" action="{% url 'add_project_tester' project.pk %}">
                                         {% csrf_token %}
                                         <div class="mb-3">
-                                            <label for="id_add_tester" class="form-label">Add Tester</label>
+                                            <label for="id_add_tester" class="form-label">Adicionar Testador</label>
                                             <select name="tester" id="id_add_tester" class="form-control">
-                                                <option value="">Select a collaborator</option>
+                                                <option value="">Selecione um colaborador</option>
                                                 {% for collaborator in collaborators %}
                                                     {% if collaborator not in project.testers.all %}
                                                         <option value="{{ collaborator.pk }}">{{ collaborator.get_full_name|default:collaborator.username }}</option>
@@ -111,7 +111,7 @@
                                                 {% endfor %}
                                             </select>
                                         </div>
-                                        <button type="submit" class="btn btn-success w-100">Add Tester</button>
+                                        <button type="submit" class="btn btn-success w-100">Adicionar Testador</button>
                                     </form>
                                 {% endif %}
                             </div>
@@ -121,12 +121,12 @@
                     <div class="col-md-6">
                         <div class="card h-100">
                             <div class="card-header bg-secondary text-white">
-                                <h5 class="mb-0">Team Members</h5>
+                                <h5 class="mb-0">Membros da Equipe</h5>
                             </div>
                             <div class="card-body d-flex flex-column">
                                 {% if project.teams.all %}
                                     <div class="mb-3">
-                                        <label for="teamSelect" class="form-label">Select Team:</label>
+                                        <label for="teamSelect" class="form-label">Selecione a Equipe:</label>
                                         <select id="teamSelect" class="form-select" onchange="showTeamMembers()">
                                             {% for team in project.teams.all %}
                                                 <option value="team-{{ team.id }}">{{ team.name }}</option>
@@ -151,7 +151,7 @@
                                                         </span>
                                                     </li>
                                                 {% empty %}
-                                                    <li class="list-group-item text-muted">No members assigned.</li>
+                                                    <li class="list-group-item text-muted">Nenhum membro atribuído.</li>
                                                 {% endfor %}
                                             </ul>
                                         </div>
@@ -160,7 +160,7 @@
                                         <form id="removeTeamForm" method="post" action="{% url 'remove_team_from_project' project.pk %}">
                                             {% csrf_token %}
                                             <input type="hidden" name="team_id" id="removeTeamId" value="{% if project.teams.all %}{{ project.teams.all.0.id }}{% endif %}">
-                                            <button type="submit" class="btn btn-danger w-100 mt-3">Remove This Team</button>
+                                            <button type="submit" class="btn btn-danger w-100 mt-3">Remover Esta Equipe</button>
                                         </form>
                                         <script>
                                         document.getElementById('teamSelect').addEventListener('change', function() {
@@ -169,7 +169,7 @@
                                         </script>
                                     {% endif %}
                                 {% else %}
-                                    <p class="text-muted flex-grow-1">No team assigned.</p>
+                                    <p class="text-muted flex-grow-1">Nenhuma equipe atribuída.</p>
                                 {% endif %}
                             </div>
                         </div>
@@ -181,25 +181,25 @@
         <!-- Latest Project Update Section -->
         <div class="card shadow-sm mb-3">
             <div class="card-header bg-secondary text-white">
-                <h5 class="mb-0">Latest Project Update</h5>
+                <h5 class="mb-0">Última Atualização do Projeto</h5>
             </div>
             <div class="card-body">
                 {% with latest_update=project.updates.all|dictsortreversed:"created_at"|first %}
                     {% if latest_update %}
-                        <p class="mb-1"><strong>Update Entry:</strong> {{ latest_update.created_at|date:"F j, Y, H:i" }}</p>
-                        <p class="mb-1"><strong>What was done:</strong><br>{{ latest_update.what_was_done }}</p>
-                        <p class="mb-1"><strong>How the project is going:</strong><br>{{ latest_update.how_project_is_going }}</p>
-                        <p class="mb-1"><strong>Setbacks:</strong><br>{{ latest_update.setbacks|default:"None" }}</p>
+                        <p class="mb-1"><strong>Data da Atualização:</strong> {{ latest_update.created_at|date:"d/m/Y, H:i" }}</p>
+                        <p class="mb-1"><strong>O que foi feito:</strong><br>{{ latest_update.what_was_done }}</p>
+                        <p class="mb-1"><strong>Como o projeto está indo:</strong><br>{{ latest_update.how_project_is_going }}</p>
+                        <p class="mb-1"><strong>Dificuldades:</strong><br>{{ latest_update.setbacks|default:"Nenhuma" }}</p>
                         <div class="mt-3">
-                            <a href="{% url 'project_updates_list' project.pk %}" class="btn btn-outline-primary w-100">View All Updates</a>
+                            <a href="{% url 'project_updates_list' project.pk %}" class="btn btn-outline-primary w-100">Ver Todas Atualizações</a>
                         </div>
                     {% else %}
-                        <p class="text-muted">No updates available.</p>
+                        <p class="text-muted">Nenhuma atualização disponível.</p>
                     {% endif %}
                 {% endwith %}
                 {% if user.is_authenticated and user == project.team_leader %}
                     <div class="mt-3">
-                        <a href="{% url 'add_project_update' project.pk %}" class="btn btn-primary w-100">Add New Update</a>
+                        <a href="{% url 'add_project_update' project.pk %}" class="btn btn-primary w-100">Adicionar Nova Atualização</a>
                     </div>
                 {% endif %}
             </div>
@@ -207,7 +207,7 @@
         <!-- Add or Create Team Button -->
         {% if not project.teams.exists and user.is_authenticated and user == project.team_leader %}
             <div class="d-flex justify-content-end mt-3">
-                <a href="{% url 'add_team_to_project' project.id %}" class="btn btn-success w-100">Add or Create Team</a>
+                <a href="{% url 'add_team_to_project' project.id %}" class="btn btn-success w-100">Adicionar ou Criar Equipe</a>
             </div>
         {% endif %}
     </div>

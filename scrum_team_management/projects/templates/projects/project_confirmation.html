@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
-{% block title %}Project Confirmation{% endblock %}
+{% block title %}Confirmação do Projeto{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card shadow-sm">
             <div class="card-header bg-success text-white text-center">
-                <h3 class="mb-0">Project Created Successfully</h3>
+                <h3 class="mb-0">Projeto Criado com Sucesso</h3>
             </div>
             <div class="card-body text-center">
-                <p>Project <strong>{{ project.name }}</strong> has been created.</p>
-                <p>What would you like to do next?</p>
+                <p>O projeto <strong>{{ project.name }}</strong> foi criado.</p>
+                <p>O que você gostaria de fazer agora?</p>
                 <div class="d-flex justify-content-around">
-                    <a href="{% url 'manual_team_create' project_id=project.id %}" class="btn btn-primary">Create Manually</a>
-                    <a href="{% url 'generate_team' project_id=project.id %}" class="btn btn-info">Generate Best Team</a>
+                    <a href="{% url 'manual_team_create' project_id=project.id %}" class="btn btn-primary">Criar Manualmente</a>
+                    <a href="{% url 'generate_team' project_id=project.id %}" class="btn btn-info">Gerar Melhor Equipe</a>
                 </div>
             </div>
         </div>

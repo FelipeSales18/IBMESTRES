@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Teams{% endblock %}
+{% block title %}Equipes{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h3 class="mb-0">Teams</h3>
+                <h3 class="mb-0">Equipes</h3>
                 {% if user.is_authenticated and user.role == "team_leader" %}
-                    <a class="btn btn-light btn-sm" href="{% url 'team-create' %}">Create Team</a>
+                    <a class="btn btn-light btn-sm" href="{% url 'team-create' %}">Criar Equipe</a>
                 {% endif %}
             </div>
             <div class="card-body">
@@ -30,14 +30,14 @@
                                                 {{ assignment.user.get_full_name|default:assignment.user.username }} ({{ assignment.role }})
                                             </span>
                                         {% empty %}
-                                            <span class="text-muted small">No members</span>
+                                            <span class="text-muted small">Sem membros</span>
                                         {% endfor %}
                                     </div>
                                 </div>
                             </div>
                         </li>
                     {% empty %}
-                        <li class="list-group-item">No teams found.</li>
+                        <li class="list-group-item">Nenhuma equipe encontrada.</li>
                     {% endfor %}
                 </ul>
             </div>

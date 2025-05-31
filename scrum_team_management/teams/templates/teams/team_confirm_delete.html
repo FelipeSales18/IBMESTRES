@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
-{% block title %}Delete Team{% endblock %}
+{% block title %}Excluir Equipe{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-header bg-danger text-white">
-                <h3 class="mb-0">Delete Team</h3>
+                <h3 class="mb-0">Excluir Equipe</h3>
             </div>
             <div class="card-body">
-                <p>Are you sure you want to delete the team <strong>{{ team.name }}</strong>?</p>
+                <p>Tem certeza que deseja excluir a equipe <strong>{{ team.name }}</strong>?</p>
                 <form method="post">
                     {% csrf_token %}
-                    <button class="btn btn-danger" type="submit">Yes, delete</button>
-                    <a class="btn btn-secondary" href="{% url 'team-detail' team.pk %}">Cancel</a>
+                    <button class="btn btn-danger" type="submit">Sim, excluir</button>
+                    <a class="btn btn-secondary" href="{% url 'team-detail' team.pk %}">Cancelar</a>
                 </form>
             </div>
         </div>

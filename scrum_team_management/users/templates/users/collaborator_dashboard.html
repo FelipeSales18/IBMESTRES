@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}Collaborator Dashboard{% endblock %}
+{% block title %}Painel do Colaborador{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-10">
-        <h2 class="mb-4">My Teams</h2>
+        <h2 class="mb-4">Minhas Equipes</h2>
         {% for team in teams %}
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
@@ -15,7 +15,7 @@
                     <div class="row">
                         <!-- Team info (70%) -->
                         <div class="col-md-8 border-end">
-                            <h5 class="mb-3">Team Members</h5>
+                            <h5 class="mb-3">Membros da Equipe</h5>
                             <ul class="list-group mb-3">
                                 {% for assignment in team.teamassignment_set.all %}
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -33,7 +33,7 @@
                                         </span>
                                     </li>
                                 {% empty %}
-                                    <li class="list-group-item text-muted">No members assigned.</li>
+                                    <li class="list-group-item text-muted">Nenhum membro atribuído.</li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -48,11 +48,11 @@
                                     </h5>
                                 </div>
                                 <div class="mb-2">
-                                    <strong>Description:</strong>
-                                    <div class="small">{{ team.project.description|default:"No description." }}</div>
+                                    <strong>Descrição:</strong>
+                                    <div class="small">{{ team.project.description|default:"Sem descrição." }}</div>
                                 </div>
                                 <div>
-                                    <strong>Preferred Competencies:</strong>
+                                    <strong>Competências Preferidas:</strong>
                                     <div>
                                         {% if team.project.preferred_competencies %}
                                             {% for comp in team.project.preferred_competencies.splitlines %}
@@ -61,19 +61,19 @@
                                                 {% endif %}
                                             {% endfor %}
                                         {% else %}
-                                            <span class="text-muted small">None listed</span>
+                                            <span class="text-muted small">Nenhuma listada</span>
                                         {% endif %}
                                     </div>
                                 </div>
                             {% else %}
-                                <span class="badge bg-secondary mb-2">No project assigned</span>
+                                <span class="badge bg-secondary mb-2">Nenhum projeto atribuído</span>
                             {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
         {% empty %}
-            <div class="alert alert-info">You are not assigned to any teams.</div>
+            <div class="alert alert-info">Você não está atribuído a nenhuma equipe.</div>
         {% endfor %}
     </div>
 </div>

@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
-{% block title %}Register{% endblock %}
+{% block title %}Registrar{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6 text-center">
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">Register As</h3>
+                <h3 class="mb-0">Registrar Como</h3>
             </div>
             <div class="card-body">
-                <a href="{% url 'register_team_leader' %}" class="btn btn-info btn-lg w-100 mb-3">Team Leader</a>
-                <a href="{% url 'register_collaborator' %}" class="btn btn-success btn-lg w-100 mb-3">Collaborator</a>
-                <a href="{% url 'register_external_po' %}" class="btn btn-warning btn-lg w-100">External PO</a>
+                <a href="{% url 'register_team_leader' %}" class="btn btn-info btn-lg w-100 mb-3">Líder de Equipe</a>
+                <a href="{% url 'register_collaborator' %}" class="btn btn-success btn-lg w-100 mb-3">Colaborador</a>
+                <a href="{% url 'register_external_po' %}" class="btn btn-warning btn-lg w-100">PO Externo</a>
             </div>
         </div>
     </div>

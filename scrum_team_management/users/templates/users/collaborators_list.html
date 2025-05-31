@@ -1,20 +1,20 @@
 {% extends 'base.html' %}
-{% block title %}Collaborators{% endblock %}
+{% block title %}Colaboradores{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-10">
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">Collaborators</h3>
+                <h3 class="mb-0">Colaboradores</h3>
             </div>
             <div class="card-body p-0">
                 <table class="table mb-0">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Role</th>
-                            <th>Best Competency</th>
-                            <th>Years of Experience</th>
+                            <th>Nome</th>
+                            <th>Papel</th>
+                            <th>Melhor Competência</th>
+                            <th>Anos de Experiência</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -40,7 +40,7 @@
                         {% empty %}
                         <tr>
                             <td colspan="5" class="text-center text-muted">
-                                No collaborators found.
+                                Nenhum colaborador encontrado.
                             </td>
                         </tr>
                         {% endfor %}
