@@ -1,0 +1,1 @@
+web: gunicorn scrum_team_management.wsgi:application
