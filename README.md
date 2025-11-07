@@ -112,4 +112,9 @@ Contributing
 
 License
 -------
-MIT License — see [LICENSE](LICENSE).
+License / Licença
+-----------------
+
+Este projeto é distribuído sob a licença MIT. Veja o arquivo `LICENSE` na raiz do repositório para o texto completo.
+
+This project is distributed under the MIT License. See the `LICENSE` file at the repository root for the full text.
